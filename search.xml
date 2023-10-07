@@ -1,0 +1,1611 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>CAP理论</title>
+    <url>/2021/03/09/CAP%E7%90%86%E8%AE%BA/</url>
+    <content><![CDATA[<h2 id="CAP理论"><a href="#CAP理论" class="headerlink" title="CAP理论"></a>CAP理论</h2><p>CAP定理（CAP theorem），又被称作布鲁尔定理（Brewer’s theorem），它指出对于一个<strong>分布式计算系统</strong>来说，不可能同时满足以下三点：</p>
+<ul>
+<li>一致性（Consistency）所有节点访问同一份最新的数据副本</li>
+<li>可用性（Availability）每次请求都能够在正常相应时间内获取到非错（错误举例：500）的响应——但是不保证获取的数据为最新数据</li>
+<li>分区容错性（Network partition）（Partition tolerance）以实际效果而言，分区相当于对通信的时限要求。系统如果不能在时限内达成数据一致性，就意味着发生了分区的情况。</li>
+</ul>
+<h2 id="一致性"><a href="#一致性" class="headerlink" title="一致性"></a>一致性</h2><h3 id="强一致性-与-弱一致性"><a href="#强一致性-与-弱一致性" class="headerlink" title="强一致性 与 弱一致性"></a>强一致性 与 弱一致性</h3><p><strong>所谓强一致性，即复制是同步的，弱一致性，即复制是异步的。</strong></p>
+<p>数据具有两类一致性，强一致性与弱一致性。强一致性也叫做线性一致性，除此以外，所有其他的一致性都是弱一致性的特殊情况。</p>
+<p>用户更新网站头像，在某个时间点，用户向主库发送更新请求，不久之后主库就收到了请求。在某个时刻，主库又会将数据变更转发给自己的从库。最后，主库通知用户更新成功。如果在返回“更新成功”并使新头像对其他用户可见之前，主库需要等待从库的确认，确保从库已经收到写入操作，那么复制是同步的，即强一致性。如果主库写入成功后，不等待从库的响应，直接返回“更新成功”，则复制是异步的，即弱一致性。<br>在用户写入某个数据之后，主节点立即做数据变更，并将对应操作转发给从节点，如果主节点没有等待从节点返回结果就立即通知用户操作成功，即复制操作是异步的，为弱一致性。如果主节点要等到部分或全部的从节点确认操作成功才通知用户，那么复制操作是同步的，具有强一致性。</p>
+<p>强一致性可以保证从节点有与主节点有一致的数据。如果主节点突然宕机，我们仍可以保证数据完整。但如果部分或全部从节点宕机或网络阻塞，主节点就无法完成写入操作。</p>
+<h3 id="最终一致性"><a href="#最终一致性" class="headerlink" title="最终一致性"></a>最终一致性</h3><p>单个领导节点的主从复制算法要求所有的写入操作都由领导节点处理，而只读操作可以由任意一个节点处理，所以适用于读多写少的场景（实际应用中大部分都是读多写少的场景），这样可以大幅度提高系统的可用性，并允许用户向最近的节点发送网络请求，使得用户有更好的体验。<br>如果使用同步复制，那么某些节点的故障将导致系统无法正常对外提供服务，即降低了系统的可用性。<br>如果采用异步复制时，因为异步，所以从节点数据可能落后，用户可能会看到过时的信息，这种不一致只是一个暂时的状态——如果等待一段时间，从库最终会赶上并与主库保持一致。这称为最终一致性。最终两个字用得很微妙，因为从写入主库到反映至从库之间的延迟，可能仅仅是几分之一秒，也可能是几个小时。</p>
+<h2 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h2><p>由于现实世界网络状况比较复杂，所以出现网络分区的概率非常大，大部分的分布式系统有对分区容错做处理，所以所谓的CAP理论三选二大部分实际基本都是为了满足分区容错性，一致性和可用性不得不二选其一。</p>
+<p>考虑如下场景，两台服务器A、B在一个集群中。如果发生网络分区。那么A和B不能够正常通信。</p>
+<ul>
+<li>如果A、B分别对外提供服务（可用性），那么系统的一致性将会出现问题（因为A、B没有同步数据，但是也有实际的应用场景，例如转账到账以实际为准）。此时系统满足了AP。</li>
+<li>如果A、B因为发生网络分区，为了保证数据的一致，完全或者部分不对外提供服务那么此时系统的将处于不可用状态（可用性降低，场景例如zk的leader挂了重新选举，此时系统不对外提供服务）。此时系统满足了CP。</li>
+</ul>
+<p>所以一般情况下，分布式系统要么满足CP，要么满足AP。</p>
+<p>如果满足CA，那么也就不存在网络分区的情况了。</p>
+]]></content>
+      <categories>
+        <category>分布式理论</category>
+      </categories>
+      <tags>
+        <tag>分布式理论</tag>
+        <tag>cap 理论</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ERR_CONTENT_LENGTH_MISMATCH-分段下载内容长度不匹配</title>
+    <url>/2021/03/17/ERR-CONTENT-LENGTH-MISMATCH-%E5%88%86%E6%AE%B5%E4%B8%8B%E8%BD%BD%E5%86%85%E5%AE%B9%E9%95%BF%E5%BA%A6%E4%B8%8D%E5%8C%B9%E9%85%8D/</url>
+    <content><![CDATA[<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>使用java进行<a href="https://blog.csdn.net/u010120886/article/details/79007001">分段下载视频</a>时，刚开始系统正常运行，突然有一天报了个</p>
+<pre><code>net::ERR_CONTENT_LENGTH_MISMATCH 206
+</code></pre>
+<p>在发生该报错时，浏览器会一直去请求数据，持续的打请求，虽然在我的chrome上能够正常播放视频，但系统显然有问题。</p>
+<h1 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h1><h2 id="第一次报文"><a href="#第一次报文" class="headerlink" title="第一次报文"></a>第一次报文</h2><p>第一次请求报文没什么特殊的</p>
+<pre><code>Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Accept-Encoding: gzip, deflate, br
+Accept-Language: en,zh-CN;q=0.9,zh;q=0.8
+Cache-Control: no-cache
+Connection: keep-alive
+Host: xxxxx:xxx
+Pragma: no-cache
+sec-ch-ua: &quot;Google Chrome&quot;;v=&quot;89&quot;, &quot;Chromium&quot;;v=&quot;89&quot;, &quot;;Not A Brand&quot;;v=&quot;99&quot;
+sec-ch-ua-mobile: ?0
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: none
+Sec-Fetch-User: ?1
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36
+</code></pre>
+<p>然后第一次返回</p>
+<pre><code>Accept-Ranges: bytes
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Headers: x-msg-timeout,X-Msg-Trace,csrfcheck,ShardingInfo,Partition,broker_key,X-Original-URI,X-Request-Method,Authorization,access_token,login_account,auth_password,user_type,tenant_id,auth_code,Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With, SecurityInfo
+Access-Control-Allow-Methods: GET,POST
+Access-Control-Expose-Headers: x-msg-timeout,X-Msg-Trace,csrfcheck,ShardingInfo,Partition,Date,Server
+Allow: POST,GET,OPTIONS
+Connection: keep-alive
+Content-Length: 22080440
+Content-Type: video/mp4
+Date: Wed, 17 Mar 2021 02:36:58 GMT
+ETag: Windows--2021-03-16-23-13-16.mp4
+Last-Modified: Wed Mar 17 10:36:58 CST 2021
+Server: xxxx
+X-Application-Context: xxxx
+</code></pre>
+<p>观察到返回header</p>
+<pre><code>Content-Length: 22080440
+</code></pre>
+<p>以上请求代表第一次请求获得了整个视频的长度。</p>
+<h2 id="第二次请求报文"><a href="#第二次请求报文" class="headerlink" title="第二次请求报文"></a>第二次请求报文</h2><p>接着的请求报文携带了以下header，代表请求该文件第0个字节到所有的字节</p>
+<pre><code>Range: bytes=0-
+</code></pre>
+<p>请求返回报文</p>
+<pre><code>Accept-Ranges: bytes
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Headers: x-msg-timeout,X-Msg-Trace,csrfcheck,ShardingInfo,Partition,broker_key,X-Original-URI,X-Request-Method,Authorization,access_token,login_account,auth_password,user_type,tenant_id,auth_code,Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With, SecurityInfo
+Access-Control-Allow-Methods: GET,POST
+Access-Control-Expose-Headers: x-msg-timeout,X-Msg-Trace,csrfcheck,ShardingInfo,Partition,Date,Server
+Allow: POST,GET,OPTIONS
+Connection: keep-alive
+Content-Length: 14485014
+Content-Range: bytes 0-14485013/14485014
+Content-Type: video/mp4
+Date: Tue, 16 Mar 2021 13:09:19 GMT
+ETag: 1615900158284-xxxxxxxx-2021216-13939-56xd9rbgi9i.webm
+Last-Modified: Tue Mar 16 21:09:19 CST 2021
+Server: xxxx
+X-Application-Context: xxxxxx
+</code></pre>
+<p>可观察到</p>
+<pre><code>Content-Length: 14485014
+Content-Range: bytes 0-14485013/14485014
+</code></pre>
+<p>也就是正常返回了全部内容。</p>
+<p>查看java代码，发现按照代码逻辑走了。</p>
+<h2 id="判断是nginx代理的问题"><a href="#判断是nginx代理的问题" class="headerlink" title="判断是nginx代理的问题"></a>判断是nginx代理的问题</h2><p>按照上面的计算，理论上不应该报错，于是使用了nginx直接访问文件，发现并不会报错，</p>
+<p>使用百度搜索，很多说是nginx的http配置</p>
+<pre><code>http&#123;        
+        proxy_buffer_size 128k;
+    proxy_buffers   32 128k;
+    proxy_busy_buffers_size 128k;
+&#125;
+</code></pre>
+<p>对我的无效，观察网络请求，发现右侧资源大小位置，写了原本应该下载100多k，但是实际只有60、70k。不走nginx代理，直接打请求到java微服务上可以正常浏览，由此判断应该是nginx代理出现问题，继续百度。</p>
+<p>发现nginx有一个proxy_temp目录，这个目录的权限是公司的运行软件的用户，然后网上说这个目录拥有者应该是</p>
+<pre><code>nobody:nobody
+</code></pre>
+<p>于是乎，修改该目录权限为nobody，发现正常浏览。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2>]]></content>
+      <categories>
+        <category>nginx</category>
+      </categories>
+      <tags>
+        <tag>nginx</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo搭建github博客</title>
+    <url>/2020/12/01/Hexo%E6%90%AD%E5%BB%BAgithub%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h3 id="1-安装hexo"><a href="#1-安装hexo" class="headerlink" title="1. 安装hexo"></a>1. 安装hexo</h3><pre><code class="shell">npm install hexo-cli &amp;&amp; npm install hexo
+</code></pre>
+<h3 id="2-初始化仓库"><a href="#2-初始化仓库" class="headerlink" title="2. 初始化仓库"></a>2. 初始化仓库</h3><pre><code class="shell">hexo init &quot;Repository Name&quot;
+</code></pre>
+<h3 id="3-修改主题和配置文件"><a href="#3-修改主题和配置文件" class="headerlink" title="3. 修改主题和配置文件"></a>3. 修改主题和配置文件</h3><p>3.1 安装主题</p>
+<pre><code class="shell">wget https://github.com/viosey/hexo-theme-material/archive/1.5.2.zip
+</code></pre>
+<p>解压，复制到themes目录下，将hexo-theme-material目录下的_config.template.yml 重命名为 _config.yml</p>
+<p>3.2 修改配置</p>
+<p> 打开仓库目录的_config.yml 修改language为<code>zh-CN</code></p>
+<h3 id="4-新建一篇博客"><a href="#4-新建一篇博客" class="headerlink" title="4. 新建一篇博客"></a>4. 新建一篇博客</h3><pre><code class="shell">hexo new &quot;My New Post&quot;
+</code></pre>
+<h3 id="5-配置远程部署环境"><a href="#5-配置远程部署环境" class="headerlink" title="5.  配置远程部署环境"></a>5.  配置远程部署环境</h3><p>5.1 安装hexo-git</p>
+<pre><code class="shell">npm install hexo-deployer-git --save
+</code></pre>
+<p>5.2 修改配置文件<br>在根目录的_config.yml中修改deploy节点成自己的博客的远程仓库信息，样例如下：</p>
+<pre><code class="yaml">deploy:
+  type: git
+  repo: git@github.com:huanmingcn/huanmingcn.github.io.git
+  branch: main
+</code></pre>
+<p>注意，分支这里，由于政治正确的原因，Github的master可能已经修改为main了。</p>
+<h3 id="6-部署"><a href="#6-部署" class="headerlink" title="6. 部署"></a>6. 部署</h3><p>6.1 本地部署</p>
+<pre><code class="shell">hexo clean &amp;&amp; hexo server
+</code></pre>
+<p>6.2 生成静态html文件</p>
+<pre><code class="shell">hexo generate
+</code></pre>
+<p>6.3 部署到远程</p>
+<pre><code class="shell">hexo deploy
+</code></pre>
+<h3 id="7-分类"><a href="#7-分类" class="headerlink" title="7. 分类"></a>7. 分类</h3><p>7.1 修改主题的配置文件_config.yml</p>
+<p>将</p>
+<pre><code class="yaml"># ---------------------------------------------------------------
+# Menu Settings
+# ---------------------------------------------------------------
+menu:
+  Home: /
+# Archives: /archives/
+# Categories: /categories
+# Tags: /tags/
+# About: /about
+# Rss: /atom.xml
+</code></pre>
+<p>修改为：</p>
+<pre><code class="yaml"># ---------------------------------------------------------------
+# Menu Settings
+# ---------------------------------------------------------------
+menu:
+  Home: /
+  Archives: /archives/
+  Categories: /categories
+  Tags: /tags/
+  About: /about
+  Rss: /atom.xml
+</code></pre>
+<p>然后将</p>
+<pre><code class="yaml">categories:
+  use: false
+  icon: chrome_reader_mode
+  divider: false
+</code></pre>
+<p>修改为：</p>
+<pre><code class="yaml">categories:
+  use: true
+  icon: chrome_reader_mode
+  divider: false
+</code></pre>
+]]></content>
+      <categories>
+        <category>Hexo</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Happens-before原则</title>
+    <url>/2021/04/13/Happens-before%E5%8E%9F%E5%88%99/</url>
+    <content><![CDATA[<h3 id="什么是Happes-before"><a href="#什么是Happes-before" class="headerlink" title="什么是Happes-before?"></a>什么是Happes-before?</h3><p>因为jvm会对代码进行编译优化，指令会出现重排序的情况，为了避免编译优化对并发编程安全性的影响，需要happens-before规则定义一些禁止编译优化的场景，保证并发编程的正确性。</p>
+<p>参考如下程序，加不加<code>volatile</code>得到两种结果，这里就不对<code>volatile</code>可见性还有禁止指令重排序两个语义做过多解释。</p>
+<pre><code class="java">public class Example&#123;
+    // 这里加不加volatile 两种结果
+    volatile boolean isContinue = true;
+
+    public static void main(String[] args) throws InterruptedException &#123;
+        Example example = new Example();
+        Thread a = new Thread()&#123;
+            @Override
+            public void run() &#123;
+                while(example.isContinue)&#123;
+
+                &#125;
+            &#125;
+        &#125;;
+        Thread b = new Thread()&#123;
+            @Override
+            public void run() &#123;
+                example.isContinue = false;
+            &#125;
+        &#125;;
+        a.start();
+        Thread.sleep(100);
+        b.start();
+    &#125;
+&#125;
+</code></pre>
+<h3 id="happens-before规则"><a href="#happens-before规则" class="headerlink" title="happens-before规则"></a>happens-before规则</h3><ul>
+<li><p>程序的顺序性规则。一个线程中，按照程序的顺序，前面的操作happens-before后续的任何操作。即一个线程中，编译器可能会重排序指令，但是保证执行结果和顺序推演的结果一样。</p>
+</li>
+<li><p>volatile规则。对一个volatile变量的写操作，happens-before后续对这个变量的读操作。</p>
+</li>
+<li><p>传递性规则。如果A happens-before B，B happens-before C，那么A happens-before C。</p>
+</li>
+<li><p>管程中的锁规则。对一个锁的解锁操作，happens-before后续对这个锁的加锁操作。(管程是一种通用的同步原语，synchronized就是管程的实现）</p>
+</li>
+<li><p>线程start()规则。主线程A启动线程B，线程B中可以看到主线程启动B之前的操作。也就是start() happens before 线程B中的操作。即线程A在启动子线程B之前对共享变量的修改结果对线程B可见。</p>
+</li>
+<li><p>线程join()规则。主线程A等待子线程B完成，当子线程B执行完毕后，主线程A可以看到线程B的所有操作。也就是说，子线程B中的任意操作，happens-before join()的返回。</p>
+</li>
+<li><p>线程中断规则：对线程interrupt()方法的调用先行发生于被中断线程代码检测到中断事件的发生，可以通过Thread.interrupted()检测到是否发生中断。</p>
+</li>
+<li><p>对象终结规则：一个对象的初始化的完成即构造函数执行的结束一定 happens-before它的finalize()方法。</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>JVM</category>
+      </categories>
+      <tags>
+        <tag>JVM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>JAVA抛异常后进程不退出</title>
+    <url>/2021/04/09/JAVA%E6%8A%9B%E5%BC%82%E5%B8%B8%E5%90%8E%E8%BF%9B%E7%A8%8B%E4%B8%8D%E9%80%80%E5%87%BA/</url>
+    <content><![CDATA[<h3 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h3><p>公司的Spring boot项目，每次启动不成功在抛出异常之后进程一直不退出，前台启动发现抛出异常之后日志线程一直在打印内容。</p>
+<h3 id="问题猜测"><a href="#问题猜测" class="headerlink" title="问题猜测"></a>问题猜测</h3><p>初步猜测是因为有其他线程没有关闭，一直在运行，导致主线程一直在等他执行完成。</p>
+<h3 id="排查问题"><a href="#排查问题" class="headerlink" title="排查问题"></a>排查问题</h3><p>首先使用JvisualVM查看使用情况，可以看到堆内存出现两次急速下降，第一次是异常退出，第二次是性能采集相关：</p>
+<p><img src="https://i.loli.net/2021/04/09/dhPV9lZRSEbLizN.png" alt="image-20210409164305428"></p>
+<p>通过Profiler对cpu进行采样：</p>
+<p><img src="https://i.loli.net/2021/04/09/FoxG48U5hTXEidO.png" alt="image-20210409165219718"></p>
+<p>从图中可以看到connectCheck方法以及netty得方法cpu占用很高，看一看这个方法做了什么：</p>
+<p><img src="https://i.loli.net/2021/04/09/ZILylA2U7O6KfE4.png" alt="image-20210409165353922"></p>
+<p><img src="https://i.loli.net/2021/04/09/kMsOngejur5G9D6.png" alt="image-20210409165420728"></p>
+<p>可以看到图中这个方法做了一个死循环的操作，并且调用方使用线程池中等额一个线程去调用，到此可以估计这里的线程一直让主线程原地一直等导致的。</p>
+<h3 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h3><p>初步的解决思路是在提交任务到线程池时加一个ShutdownHook，主动去intterupt掉这个线程。代码如下：</p>
+<p><img src="https://i.loli.net/2021/04/09/pZK48ucMrkvEHO2.png" alt="image-20210409170125936"></p>
+<p>想了想，可能会有其他线程加进线程池，所以解决问题的根本应该是关闭线程池。</p>
+<p>完犊子，试了下上面这种方法都不行，应该是jvm没有感知到要退出，所以没有触发shutdownhook函数。</p>
+<p>再跟了遍源码，发现异常抛出时被Spring Boot捕获了，虽然后面也抛出了异常，理论上应该退出的，不懂是哪里在等当前线程池关闭。所以最终的解决办法肯定是通过spring boot销毁bean时关闭线程池即可。</p>
+<pre><code class="java">
+    @PreDestroy
+    public void preDestroy() &#123;
+        log.info(&quot;销毁线程池&quot;);
+        try &#123;
+            this.threadPool.shutdownNow();
+            this.threadPool.awaitTermination(10, TimeUnit.SECONDS);
+            log.info(&quot;销毁完成&quot;);
+        &#125;catch (Exception e)&#123;
+            log.error(e);
+        &#125;
+    &#125;
+</code></pre>
+<p>结果发现还有其他的线程在继续跑，导致不能正常退出。由于代码非自己部门写的，不能debug。</p>
+<h3 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h3><p>自己研究了下代码示例如下：</p>
+<p>Main.java</p>
+<pre><code class="java">package thread;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Main &#123;
+    public static void main(String[] args) &#123;
+        SpringApplication.run(Main.class);
+    &#125;
+&#125;
+</code></pre>
+<p>AlwaysRun.java</p>
+<pre><code class="java">package thread;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+@Component
+public class AlwaysRun &#123;
+    Thread thread ;
+    @PostConstruct
+    public void doSth()&#123;
+        thread =  new Thread()&#123;
+            @Override
+            public void run() &#123;
+                while(true)&#123;
+                    System.out.println(&quot;java&quot;);
+                    try &#123;
+                        Thread.sleep(10000);
+                    &#125; catch (InterruptedException e) &#123;
+                        throw new RuntimeException();
+                    &#125;
+                &#125;
+            &#125;
+        &#125;;
+        thread.start();
+    &#125;
+    @PreDestroy
+    public void preDestroy()&#123;
+        thread.interrupt();
+    &#125;
+&#125;
+</code></pre>
+<p>LastConstruct.java</p>
+<pre><code class="java">package thread;
+
+import org.springframework.context.annotation.DependsOn;
+
+@DependsOn(&quot;alwaysRun&quot;)
+@Component
+public class LastConstruct &#123;
+    public LastConstruct()&#123;
+        throw new RuntimeException();
+    &#125;
+&#125;
+</code></pre>
+<p>Main.java启动Spring boot，然后依次构造AlwaysRun和LastConstruct，LastConstruct构造函数抛出异常模拟异常退出，只要</p>
+<pre><code class="java">    /**
+    @PreDestroy
+    public void preDestroy()&#123;
+        thread.interrupt();
+    &#125;**/
+</code></pre>
+<p>被注释可以发现进程一直会输出”java”，不会停止，但是上面去掉注释，进程马上退出。</p>
+]]></content>
+      <categories>
+        <category>Java基础</category>
+      </categories>
+      <tags>
+        <tag>Java基础</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java的守护线程</title>
+    <url>/2021/04/13/Java%E7%9A%84%E5%AE%88%E6%8A%A4%E7%BA%BF%E7%A8%8B/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title>Java中的SPI扩展机制</title>
+    <url>/2021/03/20/Java%E4%B8%AD%E7%9A%84SPI%E6%89%A9%E5%B1%95%E6%9C%BA%E5%88%B6/</url>
+    <content><![CDATA[<h3 id="什么是SPI"><a href="#什么是SPI" class="headerlink" title="什么是SPI"></a>什么是SPI</h3><p>   SPI全称Service Provider Interface，是Java提供的一套用来被第三方实现或者扩展的接口，它可以用来启用框架扩展和替换组件。 SPI的作用就是为这些被扩展的API寻找服务实现。</p>
+<h3 id="SPI和API的使用场景"><a href="#SPI和API的使用场景" class="headerlink" title="SPI和API的使用场景"></a>SPI和API的使用场景</h3><p>  API （<code>Application Programming Interface）</code>在大多数情况下，都是实现方制定接口并完成对接口的实现，<code>调用方</code>仅仅依赖接口调用，有时候无权选择不同实现，但有时可以通过继承、实现接口等自定义实现，如果是final || 非public，则无法自定义实现。 从使用人员上来说，API 直接被应用开发人员使用。</p>
+<p>  SPI （<code>Service Provider Interface）</code>是调用方来制定接口规范，提供给外部来实现，调用方在调用时则选择自己需要的外部实现。 从使用人员上来说，SPI 被框架扩展人员使用。</p>
+<h3 id="Java中的SPI"><a href="#Java中的SPI" class="headerlink" title="Java中的SPI"></a>Java中的SPI</h3><h4 id="SPI的简单示例"><a href="#SPI的简单示例" class="headerlink" title="SPI的简单示例"></a>SPI的简单示例</h4><p>  首先第一步，定义一组接口：</p>
+<pre><code class="java">public interface Upload &#123;
+    void upload(String url);
+&#125;
+</code></pre>
+<p>  这个接口分别有两个实现：</p>
+<pre><code class="java">class UploadSmallFile implements Upload &#123;
+    @Override
+    public void upload(String url) &#123;
+        System.out.println(&quot;直接上传&quot;);
+    &#125;
+&#125;
+
+class UploadBigFile implements Upload &#123;
+
+    @Override
+    public void upload(String url) &#123;
+        System.out.println(&quot;分片上传&quot;);
+    &#125;
+&#125;
+</code></pre>
+<p>然后需要在resources目录下新建META-INF/services目录，并且在这个目录下新建一个与上述接口的全限定名一致的文件，在这个文件中写入接口的实现类的全限定名：</p>
+<p><img src="https://i.loli.net/2021/04/11/5NmdAM8iaOPtjU1.png" alt="image-20210411233948346"></p>
+<p><img src="https://i.loli.net/2021/04/11/6YqA2LZTiyzgJlW.png" alt="image-20210411234019074"></p>
+<p>  通过serviceLoader加载实现类并调用：</p>
+<pre><code class="java">public class Main &#123;
+    public static void main(String[] args) &#123;
+        ServiceLoader&lt;Upload&gt; uploads = ServiceLoader.load(Upload.class);
+        for(Upload upload: uploads)&#123;
+            upload.upload(&quot;https://huanming.org&quot;);
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>  输出：<br><img src="https://i.loli.net/2021/04/11/fjAuQrvM6cdiKRo.png" alt="image-20210411234252878"></p>
+<p>可以看到其中最为核心的就是通过ServiceLoader这个类来加载具体的实现类的。</p>
+<h4 id="SPI原理解析"><a href="#SPI原理解析" class="headerlink" title="SPI原理解析"></a>SPI原理解析</h4><p>   通过上面的demo，可以看到最关键的实现就是ServiceLoader这个类，可以看下这个类的源码，如下：</p>
+<pre><code class="java">public final class ServiceLoader&lt;S&gt; implements Iterable&lt;S&gt; &#123;
+
+    // 定义被扫描目录前缀
+    private static final String PREFIX = &quot;META-INF/services/&quot;;
+
+    // 被加载的类或接口
+    private final Class&lt;S&gt; service;
+
+    // 用于定位、加载和实例化实现方实现的类的类加载器
+    private final ClassLoader loader;
+
+    // 上下文对象
+    private final AccessControlContext acc;
+
+    // 按照实例化的顺序缓存已经实例化的类
+    private LinkedHashMap&lt;String, S&gt; providers = new LinkedHashMap&lt;&gt;();
+
+    // 懒查找迭代器
+    private java.util.ServiceLoader.LazyIterator lookupIterator;
+
+    // 私有内部类，提供对所有的service的类的加载与实例化
+    private class LazyIterator implements Iterator&lt;S&gt; &#123;
+        Class&lt;S&gt; service;
+        ClassLoader loader;
+        Enumeration&lt;URL&gt; configs = null;
+        String nextName = null;
+
+        //...
+        private boolean hasNextService() &#123;
+            if (configs == null) &#123;
+                try &#123;
+                    //获取目录下所有的类
+                    String fullName = PREFIX + service.getName();
+                    if (loader == null)
+                        configs = ClassLoader.getSystemResources(fullName);
+                    else
+                        configs = loader.getResources(fullName);
+                &#125; catch (IOException x) &#123;
+                    //...
+                &#125;
+                //....
+            &#125;
+        &#125;
+
+        private S nextService() &#123;
+            String cn = nextName;
+            nextName = null;
+            Class&lt;?&gt; c = null;
+            try &#123;
+                //反射加载类
+                c = Class.forName(cn, false, loader);
+            &#125; catch (ClassNotFoundException x) &#123;
+            &#125;
+            try &#123;
+                //实例化
+                S p = service.cast(c.newInstance());
+                //放进缓存
+                providers.put(cn, p);
+                return p;
+            &#125; catch (Throwable x) &#123;
+                //..
+            &#125;
+            //..
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>上面的代码只贴出了部分关键的实现，有兴趣的读者可以自己去研究，下面贴出比较直观的spi加载的主要流程供参考：</p>
+<h3 id="spring-boot的spi机制"><a href="#spring-boot的spi机制" class="headerlink" title="spring boot的spi机制"></a>spring boot的spi机制</h3><h4 id="SpringBootApplication"><a href="#SpringBootApplication" class="headerlink" title="@SpringBootApplication"></a>@SpringBootApplication</h4><p><code>@SpringBootApplication</code>  这个注解其实由三个注解构成</p>
+<pre><code class="java">// ....
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@SpringBootConfiguration
+@EnableAutoConfiguration
+@ComponentScan(excludeFilters = &#123; @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
+        @Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) &#125;)
+public @interface SpringBootApplication &#123;
+    // ....
+&#125;
+</code></pre>
+<p>也就是<code>@SpringBootConfiguration</code>、<code>@EnableAutoConfiguration</code>、<code>@ComponentScan</code>，其中的<code>@EnableAutoConfiguration</code>便是我们讲的主角</p>
+<pre><code class="java">// ...
+@SuppressWarnings(&quot;deprecation&quot;)
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@AutoConfigurationPackage
+@Import(EnableAutoConfigurationImportSelector.class)
+public @interface EnableAutoConfiguration &#123;
+
+    String ENABLED_OVERRIDE_PROPERTY = &quot;spring.boot.enableautoconfiguration&quot;;
+
+    /**
+     * Exclude specific auto-configuration classes such that they will never be applied.
+     * @return the classes to exclude
+     */
+    Class&lt;?&gt;[] exclude() default &#123;&#125;;
+
+    /**
+     * Exclude specific auto-configuration class names such that they will never be
+     * applied.
+     * @return the class names to exclude
+     * @since 1.3.0
+     */
+    String[] excludeName() default &#123;&#125;;
+
+&#125;
+</code></pre>
+<h4 id="EnableAutoConfiguration"><a href="#EnableAutoConfiguration" class="headerlink" title="@EnableAutoConfiguration"></a>@EnableAutoConfiguration</h4><p><code>EnableAutoConfiguration</code>中最关键的要属<code>@Import(AutoConfigurationImportSelector.class)</code>，借助<code>AutoConfigurationImportSelector</code>，<code>@EnableAutoConfiguration</code>可以帮助<code>SpringBoot</code>应用将所有符合条件的<code>@Configuration</code>配置都加载到当前<code>SpringBoot</code>创建并使用的<code>IoC</code>容器。</p>
+<p>借助于Spring框架原有的一个工具类：SpringFactoriesLoader的支持，@EnableAutoConfiguration可以智能的自动配置功效才得以大功告成！</p>
+<p>AutoConfigurationImportSelector中的部分代码：</p>
+<pre><code class="java">public class AutoConfigurationImportSelector&#123;
+// ....
+    protected List&lt;String&gt; getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) &#123;
+        // 加载所有的@EnableAutoConfiguration的类并返回为候选人
+        List&lt;String&gt; configurations = SpringFactoriesLoader.loadFactoryNames(getSpringFactoriesLoaderFactoryClass(),
+                getBeanClassLoader());
+        Assert.notEmpty(configurations, &quot;No auto configuration classes found in META-INF/spring.factories. If you &quot;
+                + &quot;are using a custom packaging, make sure that file is correct.&quot;);
+        return configurations;
+    &#125;
+    /**
+     * Return the class used by &#123;@link SpringFactoriesLoader&#125; to load configuration
+     * candidates.
+     * @return the factory class
+     */
+    protected Class&lt;?&gt; getSpringFactoriesLoaderFactoryClass() &#123;
+        return EnableAutoConfiguration.class;
+    &#125;
+    // ....
+&#125;
+</code></pre>
+<p><code>SpringFactoriesLoader</code>实现：</p>
+<pre><code class="java">// ...
+public abstract class SpringFactoriesLoader &#123;
+
+   /**
+    * The location to look for factories.
+    * &lt;p&gt;Can be present in multiple JAR files.
+    */
+   public static final String FACTORIES_RESOURCE_LOCATION = &quot;META-INF/spring.factories&quot;;
+
+   private static final Log logger = LogFactory.getLog(SpringFactoriesLoader.class);
+
+
+   /**
+    * Load and instantiate the factory implementations of the given type from
+    * &#123;@value #FACTORIES_RESOURCE_LOCATION&#125;, using the given class loader.
+    * &lt;p&gt;The returned factories are sorted through &#123;@link AnnotationAwareOrderComparator&#125;.
+    * &lt;p&gt;If a custom instantiation strategy is required, use &#123;@link #loadFactoryNames&#125;
+    * to obtain all registered factory names.
+    * @param factoryClass the interface or abstract class representing the factory
+    * @param classLoader the ClassLoader to use for loading (can be &#123;@code null&#125; to use the default)
+    * @throws IllegalArgumentException if any factory implementation class cannot
+    * be loaded or if an error occurs while instantiating any factory
+    * @see #loadFactoryNames
+    */
+   public static &lt;T&gt; List&lt;T&gt; loadFactories(Class&lt;T&gt; factoryClass, ClassLoader classLoader) &#123;
+      Assert.notNull(factoryClass, &quot;&#39;factoryClass&#39; must not be null&quot;);
+      ClassLoader classLoaderToUse = classLoader;
+      if (classLoaderToUse == null) &#123;
+         classLoaderToUse = SpringFactoriesLoader.class.getClassLoader();
+      &#125;
+      List&lt;String&gt; factoryNames = loadFactoryNames(factoryClass, classLoaderToUse);
+      if (logger.isTraceEnabled()) &#123;
+         logger.trace(&quot;Loaded [&quot; + factoryClass.getName() + &quot;] names: &quot; + factoryNames);
+      &#125;
+      List&lt;T&gt; result = new ArrayList&lt;T&gt;(factoryNames.size());
+      for (String factoryName : factoryNames) &#123;
+         result.add(instantiateFactory(factoryName, factoryClass, classLoaderToUse));
+      &#125;
+      AnnotationAwareOrderComparator.sort(result);
+      return result;
+   &#125;
+
+   /**
+    * Load the fully qualified class names of factory implementations of the
+    * given type from &#123;@value #FACTORIES_RESOURCE_LOCATION&#125;, using the given
+    * class loader.
+    * @param factoryClass the interface or abstract class representing the factory
+    * @param classLoader the ClassLoader to use for loading resources; can be
+    * &#123;@code null&#125; to use the default
+    * @throws IllegalArgumentException if an error occurs while loading factory names
+    * @see #loadFactories
+    */
+   public static List&lt;String&gt; loadFactoryNames(Class&lt;?&gt; factoryClass, ClassLoader classLoader) &#123;
+      String factoryClassName = factoryClass.getName();
+      try &#123;
+         Enumeration&lt;URL&gt; urls = (classLoader != null ? classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :
+               ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION));
+         List&lt;String&gt; result = new ArrayList&lt;String&gt;();
+         while (urls.hasMoreElements()) &#123;
+            URL url = urls.nextElement();
+            Properties properties = PropertiesLoaderUtils.loadProperties(new UrlResource(url));
+            String propertyValue = properties.getProperty(factoryClassName);
+            for (String factoryName : StringUtils.commaDelimitedListToStringArray(propertyValue)) &#123;
+               result.add(factoryName.trim());
+            &#125;
+         &#125;
+         return result;
+      &#125;
+      catch (IOException ex) &#123;
+         throw new IllegalArgumentException(&quot;Unable to load factories from location [&quot; +
+               FACTORIES_RESOURCE_LOCATION + &quot;]&quot;, ex);
+      &#125;
+   &#125;
+
+   @SuppressWarnings(&quot;unchecked&quot;)
+   private static &lt;T&gt; T instantiateFactory(String instanceClassName, Class&lt;T&gt; factoryClass, ClassLoader classLoader) &#123;
+      try &#123;
+         Class&lt;?&gt; instanceClass = ClassUtils.forName(instanceClassName, classLoader);
+         if (!factoryClass.isAssignableFrom(instanceClass)) &#123;
+            throw new IllegalArgumentException(
+                  &quot;Class [&quot; + instanceClassName + &quot;] is not assignable to [&quot; + factoryClass.getName() + &quot;]&quot;);
+         &#125;
+         Constructor&lt;?&gt; constructor = instanceClass.getDeclaredConstructor();
+         ReflectionUtils.makeAccessible(constructor);
+         return (T) constructor.newInstance();
+      &#125;
+      catch (Throwable ex) &#123;
+         throw new IllegalArgumentException(&quot;Unable to instantiate factory class: &quot; + factoryClass.getName(), ex);
+      &#125;
+   &#125;
+
+&#125;
+</code></pre>
+<p>在<code>AutoConfigurationImportSelector</code>类中可以看到通过<code>SpringFactoriesLoader.loadFactoryNames()</code><br>把 <code>META-INF/spring.factories</code>中每一个被<code>@EnableAutoConfiguration</code>注解的类都加载到容器中。每一个xxxAutoConfiguration文件一般都会有下面的条件注解:</p>
+<pre><code>@ConditionalOnClass ： classpath中存在该类时起效
+@ConditionalOnMissingClass ： classpath中不存在该类时起效
+@ConditionalOnBean ： DI容器中存在该类型Bean时起效
+@ConditionalOnMissingBean ： DI容器中不存在该类型Bean时起效
+@ConditionalOnSingleCandidate ： DI容器中该类型Bean只有一个或@Primary的只有一个时起效
+@ConditionalOnExpression ： SpEL表达式结果为true时
+@ConditionalOnProperty ： 参数设置或者值一致时起效
+@ConditionalOnResource ： 指定的文件存在时起效
+@ConditionalOnJndi ： 指定的JNDI存在时起效
+@ConditionalOnJava ： 指定的Java版本存在时起效
+@ConditionalOnWebApplication ： Web应用环境下起效
+@ConditionalOnNotWebApplication ： 非Web应用环境下起效
+</code></pre>
+<h4 id="SpringFactoriesLoader"><a href="#SpringFactoriesLoader" class="headerlink" title="SpringFactoriesLoader"></a>SpringFactoriesLoader</h4><p>SpringFactoriesLoader属于Spring框架私有的一种扩展方案(类似于Java的SPI方案java.util.ServiceLoader)，其主要功能就是从指定的配置文件META-INF/spring-factories加载配置，spring-factories是一个典型的properties文件，只不过key和value都是Java类型的全限定类名，举例：</p>
+<pre><code class="properties">example.MyService=example.MyServiceImpl1,example.MyServiceImpl2
+</code></pre>
+<p>对于<code>@EnableAutoConfiguration</code>来说，<code>SpringFactoriesLoader</code>的用途稍微不同一些，其本意是为了提供SPI扩展的场景，而在<code>@EnableAutoConfiguration</code>场景中，它更多提供了一种配置查找的功能支持，即根据<code>@EnableAutoConfiguration</code>的全限定类名<code>org.springframework.boot.autoconfig.EnableAutoConfiguration</code>作为查找的Key，获得对应的一组<code>@Configuration</code>类。</p>
+<p><code>SpringFactoriesLoader</code>是一个抽象类，类中定义的静态属性定义了其加载资源的路径<code>public static final String FACTORIES_RESOURCE_LOCATION = &quot;META-INF/spring.factories&quot;</code>，此外还有三个静态方法：</p>
+<pre><code>loadFactories：加载指定的factoryClass并进行实例化。
+loadFactoryNames：加载指定的factoryClass的名称集合。
+instantiateFactory：对指定的factoryClass进行实例化。
+在loadFactories方法中调用了loadFactoryNames以及instantiateFactory方法。
+</code></pre>
+<p>loadFactories方法首先获取类加载器，然后调用loadFactoryNames方法获取所有的指定资源的名称集合、接着调用instantiateFactory方法实例化这些资源类并将其添加到result集合中。最后调用AnnotationAwareOrderComparator.sort方法进行集合的排序。</p>
+<pre><code class="java">
+public static &lt;T&gt; List&lt;T&gt; loadFactories(Class&lt;T&gt; factoryClass, ClassLoader classLoader) &#123;
+   Assert.notNull(factoryClass, &quot;&#39;factoryClass&#39; must not be null&quot;);
+   ClassLoader classLoaderToUse = classLoader;
+   if (classLoaderToUse == null) &#123;
+      classLoaderToUse = SpringFactoriesLoader.class.getClassLoader();
+   &#125;
+   List&lt;String&gt; factoryNames = loadFactoryNames(factoryClass, classLoaderToUse);
+   if (logger.isTraceEnabled()) &#123;
+      logger.trace(&quot;Loaded [&quot; + factoryClass.getName() + &quot;] names: &quot; + factoryNames);
+   &#125;
+   List&lt;T&gt; result = new ArrayList&lt;T&gt;(factoryNames.size());
+   for (String factoryName : factoryNames) &#123;
+      result.add(instantiateFactory(factoryName, factoryClass, classLoaderToUse));
+   &#125;
+   AnnotationAwareOrderComparator.sort(result);
+   return result;
+&#125;
+</code></pre>
+<p>loadFactories方法首先获取类加载器，然后调用loadFactoryNames方法获取所有的指定资源的名称集合、接着调用instantiateFactory方法实例化这些资源类并将其添加到result集合中。最后调用AnnotationAwareOrderComparator.sort方法进行集合的排序。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>spi主要的作用：</p>
+<ul>
+<li>不需要改动源码就可以实现扩展，解耦。</li>
+<li>实现扩展对原来的代码几乎没有侵入性。</li>
+<li>只需要添加配置就可以实现扩展，符合开闭原则。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>SPI</category>
+      </categories>
+      <tags>
+        <tag>SPI</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>zookeeper入门</title>
+    <url>/2021/02/20/zookeeper%E5%85%A5%E9%97%A8/</url>
+    <content><![CDATA[<h3 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h3><p>zookeeper是一个分布式协调服务框架，主要用来解决分布式集群中引用系统的一致性问题，例如避免同时操作同一数据避免脏读。</p>
+<p>本质是一个 <strong>分布式的</strong> <strong>小文件</strong> （如几k到几十k）存储系统。提供基于类似文件系统的目录树方式的数据存储，并且可以对树中的节点进行有效管理，从而维护和监控数据的状态变化。通过监控数据状态的变化，从而达到基于数据的集群管理。</p>
+<h4 id="1-1-常见应用"><a href="#1-1-常见应用" class="headerlink" title="1.1 常见应用"></a>1.1 常见应用</h4><ul>
+<li><p>统一命名服务</p>
+</li>
+<li><p>分布式配置管理</p>
+</li>
+<li><p>分布式消息队列</p>
+</li>
+<li><p>分布式锁</p>
+</li>
+<li><p>分布式协调</p>
+</li>
+</ul>
+<h4 id="1-2-特性"><a href="#1-2-特性" class="headerlink" title="1.2 特性"></a>1.2 特性</h4><ul>
+<li><p>全局数据一致性： 每个server保存一份相同的数据副本，client无论连哪个server，展示的数据都是一样的。最重要的特性。</p>
+</li>
+<li><p>可靠性：如果消息（crud）被一台服务器接受，那么将被所有的服务器接受。为了保证全局数据一致性而产生。</p>
+</li>
+<li><p>顺序性：保证全局有序和偏序两种：全局有序指如果在一台服务器上消息a在消息b前发布，则所有服务器消息a都将在消息b前发布；偏序是指如果一个消息b在消息a后被同一发布者发布，a必将排在b前面。即统一发布者发布顺序性。为了保证全局数据一致性而产生。</p>
+</li>
+<li><p>数据更新原子性：一次数据更新要么成功（半数以上节点成功），要么失败，不存在中间状态。在半数成功之后其他节点直接同步保全局数据一致性。</p>
+</li>
+<li><p>实时性：zookeeper保证客户端将在一定时间间隔内获得服务器的更新信息，或者服务器失效的信息。</p>
+</li>
+</ul>
+<h4 id="1-3-角色"><a href="#1-3-角色" class="headerlink" title="1.3 角色"></a>1.3 角色</h4><h5 id="1-3-1-leader"><a href="#1-3-1-leader" class="headerlink" title="1.3.1 leader"></a>1.3.1 leader</h5><p>zookeeper句群工作的核心，一个集群有且只有一个leader。事务请求（写操作）的唯一调度和处理者。保证集群事务处理的顺序性，集群内部各个服务器的调度者。</p>
+<p>对于cud等写操作请求，需统一转发给leader处理，leader决定编号、执行操作，这个过程为一个事务。</p>
+<h5 id="1-3-2-follower"><a href="#1-3-2-follower" class="headerlink" title="1.3.2 follower"></a>1.3.2 follower</h5><p>处理客户端的非事务请求（读操作），转发事务请求给leader。参与集群leader选举投票。</p>
+<h5 id="1-3-3-Observer"><a href="#1-3-3-Observer" class="headerlink" title="1.3.3 Observer"></a>1.3.3 Observer</h5><p>访问量较大时可新增观察者角色。观察者观察zookeeper集群的最新状态变化并将这些状态同步过来，其对于非事务请求可以独立处理，对于事务请求将转发给leader处理。</p>
+<p>不参与任何形式的投票，只提供非事务服务，通常用于在不影响集群事务处理能力的情况下提升集群的的非事务处理能力。</p>
+<h3 id="二、集群搭建"><a href="#二、集群搭建" class="headerlink" title="二、集群搭建"></a>二、集群搭建</h3><h4 id="2-1-通用步骤"><a href="#2-1-通用步骤" class="headerlink" title="2.1 通用步骤"></a>2.1 通用步骤</h4><p>通常选择2n + 1台服务器组成。因为leader选举使用Paxos算法实现，只要半数支持即可，所以服务器数量一般为奇数。</p>
+<ul>
+<li><p>检查各个服务器时间是否同步，检测防火墙是否关闭。</p>
+</li>
+<li><p>配置主机名称到ip地址映射配置。</p>
+</li>
+<li><p>修改zookeeper配置文件。</p>
+</li>
+<li><p>远程复制分发安装文件（将上述配置完成的zk分发到不同的主机上）。</p>
+</li>
+<li><p>修改myid。</p>
+</li>
+<li><p>启动zookeeper集群。</p>
+</li>
+</ul>
+<h4 id="2-2-配置文件修改"><a href="#2-2-配置文件修改" class="headerlink" title="2.2 配置文件修改"></a>2.2 配置文件修改</h4><p>添加数据路径配置</p>
+<pre><code class="properties">dataDir=/data/directory/
+</code></pre>
+<p>添加集群数据：</p>
+<pre><code class="properties"> # server.1 表示服务器的id是1
+ # s2 表示主机名
+ # 2888 3888分别表示心跳端口和选举端口
+ # 行末不能有空格，如果行末有空格将会读取失败
+ # s1不能随便设置成自定义符号，否则会建立连接
+ # 如果s1设置为ip那么当前服务器的配置配置文件的ip应该设置为0.0.0.0
+server.1=s1:2888:3888
+server.2=s2:2888:3888 
+server.3=s3:2888:3888 
+</code></pre>
+<p>在<code>/data/directory</code>文件夹中新建myid文件，文件内容为服务器的id号，如：server.1的myid文件为1。</p>
+<pre><code class="shell">touch myid &amp;&amp; echo 1 &gt; /data/directory/myid
+</code></pre>
+<p>需要使用观察者，在对应节点配置文件中添加如下配置：</p>
+<pre><code class="properties">peerType=observer
+</code></pre>
+<p>其次，在配置文件制定哪些节点为观察者，如：</p>
+<pre><code class="properties">server.1=localhost:2181:3181:observer
+</code></pre>
+<h4 id="2-3-启动"><a href="#2-3-启动" class="headerlink" title="2.3 启动"></a>2.3 启动</h4><p>使用安装目录下的<code>bin/zkServer.sh</code>启动。</p>
+<pre><code class="shell"># 在有一半的节点启动完之后几可使用status查看状态
+bash bin/zkServer.sh start
+</code></pre>
+<h4 id="2-4-查看状态"><a href="#2-4-查看状态" class="headerlink" title="2.4 查看状态"></a>2.4 查看状态</h4><pre><code class="shell"> bash bin/zkServer.sh status
+</code></pre>
+<h4 id="2-5-关闭"><a href="#2-5-关闭" class="headerlink" title="2.5 关闭"></a>2.5 关闭</h4><pre><code class="shell"> bash bin/zkServer.sh stop
+</code></pre>
+<h3 id="三、数据模型"><a href="#三、数据模型" class="headerlink" title="三、数据模型"></a>三、数据模型</h3><h4 id="3-1-Znode"><a href="#3-1-Znode" class="headerlink" title="3.1 Znode"></a>3.1 Znode</h4><p>zookeeper的数据模型，在结构上和标准文件系统非常相似，拥有一个层次的命名空间，都是采用树形层次结构，Zookeeper中树的每个节点称为ZNode，和文件系统的目录树一样，zookeeper树中的每个节点可以有子节点。ZNode具有以下特点：</p>
+<ul>
+<li><p>Znode兼具文件和目录的特点。既像文件一样维护数据、元信息、ACL、时间戳等数据结构。又像目录一样作为路径标识的一部分，并可以具有子ZNode。在权限允许的情况下，用户可对ZNode进行crud。</p>
+</li>
+<li><p>Znode具有原子性。读操作将获取与节点有关的所有数据，写操作也将替换掉所有节点的所有数据。每个节点有自己的ACL（访问控制列表），规定了用户的权限，限定了特定用户对目标节点可以执行的操作。</p>
+</li>
+<li><p>Znode存储大小有限制。Zookeeper可以关联一些数据，但是并没有设计为常规的数据库或者大数据存储，相反，它用来管理调度数据，如分布式应用的配置文件、状态信息、汇集位置等。这些数据共同的特性就是都是很小的数据，大小都是以KB为单位。Zookeeper的服务器和客户端都被严格设计为严格检查并限制每个Znode的数据大小最大为1MB。但是常规使用中应远小于它。</p>
+</li>
+<li><p>Znode通过路径引用。如同Unix的文件路径，但是必须是绝对路径，即以<strong>斜杠字符</strong>开头，除此之外，路径必须是唯一的，一个路径只能有一个表示（类似哈夫曼编码，但是哈夫曼编码是二进制的）。路径由Unicode编码，并且有一定限制，“/zookeeper”用于保存管理信息，例如配额信息。</p>
+</li>
+</ul>
+<p>Znode由三部分组成：</p>
+<ol>
+<li>stat：状态信息。描述Znode的版本、权限等信息。</li>
+<li>data：与该Znode关联的数据。</li>
+<li>children：该Znode下的子节点。</li>
+</ol>
+<h4 id="3-2-Znode类型"><a href="#3-2-Znode类型" class="headerlink" title="3.2 Znode类型"></a>3.2 Znode类型</h4><p>节点在创建时生命周期即确定，且不能被改变，根据生命周期分为：</p>
+<ul>
+<li><p>临时节点。该节点生命周期依赖于创建它的会话，一旦会话结束，临时节点将被自动删除，也可以手动删除。临时节点不允许有子节点。</p>
+</li>
+<li><p>永久节点。该节点生命周期不依赖于会话，且只有客户端显式删除时才会被删除。</p>
+</li>
+</ul>
+<p>Znode具有序列化特性。如果在创建的时候指定-s参数，则具有序列化特性，在创建完成之后Znode的名字还会自动追加一个不断增加的序列号，该序列号对于当前节点的父节点来说是唯一的，这样便能够记录每个子节点的创建先后顺序。格式为“%10d”（10位数字，不够补零，如0000000001）。<br>举例：</p>
+<pre><code class="shell">create -s /a aValue
+# Created /a0000000001
+create -s /b bValue
+# Created /b0000000002
+get /a
+# org.apache.zookeeper.KeeperException$NoNodeException: KeeperErrorCode = NoNode for /a
+ls /
+# [a0000000001, b0000000002, dubbo, zookeeper]
+get /a0000000001
+# aValue
+</code></pre>
+<p>所以Znode又可以分为：</p>
+<table>
+<thead>
+<tr>
+<th>Znode名字</th>
+<th>持久化</th>
+<th>序列化</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PERSISTENT 永久节点</td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td>EPHEMERAL  临时节点</td>
+<td>否</td>
+<td>否</td>
+</tr>
+<tr>
+<td>PERSISTENT_SEQUENTIAL 永久序列化节点</td>
+<td>是</td>
+<td>是</td>
+</tr>
+<tr>
+<td>EPHEMERAL_SEQUENTIAL 临时序列化节点</td>
+<td>否</td>
+<td>否</td>
+</tr>
+</tbody></table>
+<h4 id="3-3-节点属性"><a href="#3-3-节点属性" class="headerlink" title="3.3 节点属性"></a>3.3 节点属性</h4><p>通过<code>get</code>或者<code>stat</code>命令可查看Znode的属性。</p>
+<pre><code class="shell">get /a0000000001
+# aValue
+# cZxid = 0x16d
+# ctime = Tue Feb 23 10:58:08 CST 2021
+# mZxid = 0x16d
+# mtime = Tue Feb 23 10:58:08 CST 2021
+# pZxid = 0x16d
+# cversion = 0
+# dataVersion = 0
+# aclVersion = 0
+# ephemeralOwner = 0x0
+# dataLength = 6
+# numChildren = 0
+</code></pre>
+<p>dataVersion: 数据版本号，每次对节点进行set操作dataVersion都会加1（即使set前后值一致），有效避免了数据出现的先后顺序问题。<br>cversion：子节点的版本号。当当前节点的子节点发生变化时，cversion的值加1。<br>aclVersion：acl的版本号。<br>cZxid：当前节点创建的事务id。<br>mZxid：当前节点被修改的事务id。每次对当前节点修改都会更新mZxid。</p>
+<blockquote>
+<blockquote>
+<p>对于zk来说，每次的变化都会产生唯一的事务id，zxid（Zookeeper Transaction Id）。通过zxid可以确定更新操作的先后顺序。如zxid1 &lt; zxid2，说明zxid1先于zxid2发生。zxid对于整个zookeeper都是唯一的，即使操作的是不同节点。</p>
+</blockquote>
+</blockquote>
+<p>pZxid：该节点的子节点列表最后一次被修改时的时间，子节点内容变更不会变更pZxid // TODO 存疑</p>
+<p>ctime: 节点创建的时间戳。<br>mtime：节点最后更新的时间戳。<br>ephemeralOwner：如果节点为永久节点，取值0。临时节点绑定对应的session id（会话id）。</p>
+<blockquote>
+<blockquote>
+<p>在client和server通信前，首先要建立连接，每个连接可以取得对应的session id，连接建立后如果发生连接超时、授权失败或显式关闭，连接将处于CLOSED状态，此时session结束。</p>
+</blockquote>
+</blockquote>
+<h3 id="四、Zookeeper选举"><a href="#四、Zookeeper选举" class="headerlink" title="四、Zookeeper选举"></a>四、Zookeeper选举</h3><p>Leader选举是保证分布式数据一致性的关键所在。当Zookeeper集群中的一台服务器出现以下两种情况之一时，需要进入Leader选举。</p>
+<p>　　(1) 服务器初始化启动。</p>
+<p>　　(2) 服务器运行期间无法和Leader保持连接。</p>
+<h4 id="服务器初始化启动"><a href="#服务器初始化启动" class="headerlink" title="服务器初始化启动"></a>服务器初始化启动</h4><p>若进行Leader选举，则至少需要两台机器，这里选取3台机器组成的服务器集群为例。在集群初始化阶段，当有一台服务器Server1启动时，其单独无法进行和完成Leader选举，当第二台服务器Server2启动时，此时两台机器可以相互通信，每台机器都试图找到Leader，于是进入Leader选举过程。即超过半数机器启动完成并相互通信之后开始选举，选举过程如下：</p>
+<ol>
+<li><p>每个Server发出一个投票。由于是初始情况，Server1和Server2都会将自己作为Leader服务器来进行投票，每次投票会包含所推举的服务器的myid和ZXID，使用(myid, ZXID)来表示，此时Server1的投票为(1, 0)，Server2的投票为(2, 0)，然后各自将这个投票发给集群中其他机器。</p>
+</li>
+<li><p>接受来自各个服务器的投票。集群的每个服务器收到投票后，首先判断该投票的有效性，如检查是否是本轮投票、是否来自LOOKING状态的服务器。</p>
+</li>
+<li><p>处理投票。针对每一个投票，服务器都需要将别人的投票和自己的投票进行PK，PK规则如下：</p>
+<ul>
+<li><p>优先检查ZXID。ZXID比较大的服务器优先作为Leader。</p>
+</li>
+<li><p>如果ZXID相同，那么就比较myid。myid较大的服务器作为Leader服务器。</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>对于Server1而言，它的投票是(1, 0)，接收Server2的投票为(2, 0)，首先会比较两者的ZXID，均为0，再比较myid，此时Server2的myid最大，于是更新自己的投票为(2, 0)，然后重新投票，对于Server2而言，其无须更新自己的投票，只是再次向集群中所有机器发出上一次投票信息即可。</p>
+<ol start="4">
+<li><p> 统计投票。每次投票后，服务器都会统计投票信息，判断是否已经有过半机器接受到相同的投票信息，对于Server1、Server2而言，都统计出集群中已经有两台机器接受了(2, 0)的投票信息，此时便认为已经选出了Leader。</p>
+</li>
+<li><p>改变服务器状态。一旦确定了Leader，每个服务器就会更新自己的状态，如果是Follower，那么就变更为FOLLOWING，如果是Leader，就变更为LEADING。</p>
+</li>
+</ol>
+<h4 id="服务器运行期间无法和Leader保持连接"><a href="#服务器运行期间无法和Leader保持连接" class="headerlink" title="服务器运行期间无法和Leader保持连接"></a>服务器运行期间无法和Leader保持连接</h4><p>在Zookeeper运行期间，Leader与非Leader服务器各司其职，即便当有非Leader服务器宕机或新加入，此时也不会影响Leader，但是一旦Leader服务器挂了，那么整个集群将暂停对外服务（此时服务不可用，所以丧失了CAP理论中的A），进入新一轮Leader选举，其过程和启动时期的Leader选举过程基本一致。假设正在运行的有Server1、Server2、Server3三台服务器，当前Leader是Server2，若某一时刻Leader挂了，此时便开始Leader选举。选举过程如下</p>
+<ol>
+<li><p><strong>变更状态</strong>。Leader挂后，余下的非Observer服务器都会将自己的服务器状态变更为LOOKING，然后开始进入Leader选举过程。</p>
+</li>
+<li><p> <strong>每个Server会发出一个投票</strong>。在运行期间，每个服务器上的ZXID可能不同，此时假定Server1的ZXID为123，Server3的ZXID为122；在第一轮投票中，Server1和Server3都会投自己，产生投票(1, 123)，(3, 122)，然后各自将投票发送给集群中所有机器。</p>
+</li>
+<li><p><strong>接收来自各个服务器的投票</strong>。与启动时过程相同。</p>
+</li>
+<li><p> <strong>处理投票</strong>。与启动时过程相同。</p>
+</li>
+<li><p> <strong>统计投票</strong>。与启动时过程相同，此时，Server1将会成为Leader。</p>
+</li>
+<li><p><strong>改变服务器的状态</strong>。与启动时过程相同。</p>
+</li>
+</ol>
+<h4 id="Leader选举算法分析"><a href="#Leader选举算法分析" class="headerlink" title="Leader选举算法分析"></a>Leader选举算法分析</h4><p>在3.4.0后的Zookeeper的版本只保留了TCP版本的FastLeaderElection选举算法。当一台机器进入Leader选举时，当前集群可能会处于以下两种状态：</p>
+<ol>
+<li>集群中已经存在Leader。</li>
+<li>集群中不存在Leader。</li>
+</ol>
+<p>对于集群中已经存在Leader而言，此种情况一般都是某台机器启动得较晚，在其启动之前，集群已经在正常工作，对这种情况，该机器试图去选举Leader时，会被告知当前服务器的Leader信息，对于该机器而言，仅仅需要和Leader机器建立起连接，并进行状态同步即可。而在集群中不存在Leader情况下则会相对复杂，其步骤如下。</p>
+<h5 id="第一次投票"><a href="#第一次投票" class="headerlink" title="第一次投票"></a>第一次投票</h5><p>无论哪种导致进行Leader选举，集群的所有机器都处于试图选举出一个Leader的状态，即LOOKING状态，LOOKING机器会向所有其他机器发送消息，该消息称为投票。投票中包含了SID（服务器的唯一标识）和ZXID（事务ID），以(SID, ZXID)二元组形式来标识一次投票信息。</p>
+<p>举例：假定Zookeeper由5台机器组成，SID分别为1、2、3、4、5，ZXID分别为9、9、9、8、8，并且此时SID为2的机器是Leader机器，某一时刻，1、2所在机器出现故障，因此集群开始进行Leader选举。在第一次投票时，每台机器都会将自己作为投票对象，于是SID为3、4、5的机器投票情况分别为(3, 9)，(4, 8)， (5, 8)。</p>
+<h5 id="变更投票"><a href="#变更投票" class="headerlink" title="变更投票"></a>变更投票</h5><p>每台机器发出投票后，也会收到其他机器的投票，每台机器会根据一定规则来处理收到的其他机器的投票，并以此来决定是否需要变更自己的投票，这个规则也是整个Leader选举算法的核心所在，其中术语描述如下</p>
+<ul>
+<li><p>vote_sid：接收到的投票中所推举Leader服务器的SID。</p>
+</li>
+<li><p>vote_zxid：接收到的投票中所推举Leader服务器的ZXID。</p>
+</li>
+<li><p>self_sid：当前服务器自己的SID。</p>
+</li>
+<li><p>self_zxid：当前服务器自己的ZXID。</p>
+</li>
+</ul>
+<p>每次对收到的投票的处理，都是对(vote_sid, vote_zxid)和(self_sid, self_zxid)对比的过程。</p>
+<p>​    规则一：如果vote_zxid大于self_zxid，就认可当前收到的投票，并再次将该投票发送出去。</p>
+<p>​    规则二：如果vote_zxid小于self_zxid，那么坚持自己的投票，不做任何变更。</p>
+<p>​    规则三：如果vote_zxid等于self_zxid，那么就对比两者的SID，如果vote_sid大于self_sid，那么就认可当前收到的投票，并再次将该投票发送出去。</p>
+<p>​    规则四：如果vote_zxid等于self_zxid，并且vote_sid小于self_sid，那么坚持自己的投票，不做任何变更。</p>
+<p>结合上面规则，给出下面的集群变更过程。</p>
+<table>
+<thead>
+<tr>
+<th>服务器/ 时间周期</th>
+<th>出现故障时</th>
+<th>第一次投票</th>
+<th>变更投票</th>
+<th>确定LEADER</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Server1</td>
+<td>出现故障</td>
+<td>\</td>
+<td>\</td>
+<td>\</td>
+</tr>
+<tr>
+<td>Server2</td>
+<td>出现故障</td>
+<td>\</td>
+<td>\</td>
+<td>\</td>
+</tr>
+<tr>
+<td>Server3</td>
+<td>leader挂了，服务不可用，状态变更为LOOKING</td>
+<td>投票（3，9）</td>
+<td>收到两个投票（4，8）、（5，8），不变更投票。</td>
+<td>收到两个投票（3，9），确定Server3为LEADER，变更状态为LEADING。</td>
+</tr>
+<tr>
+<td>Server4</td>
+<td>leader挂了，服务不可用，状态变更为LOOKING</td>
+<td>投票（4，8）</td>
+<td>收到两个投票（3，9）、（5，8），变更投票，投票（3，9）</td>
+<td>收到两个投票（3，9），确定Server3为LEADER，变更状态为FOLLOWING。</td>
+</tr>
+<tr>
+<td>Server5</td>
+<td>leader挂了，服务不可用，状态变更为LOOKING</td>
+<td>投票（5，8）</td>
+<td>收到两个投票（3，9）、（5，8），变更投票，投票（3，9）</td>
+<td>收到两个投票（3，9），确定Server3为LEADER，变更状态为FOLLOWING。</td>
+</tr>
+</tbody></table>
+<p>(3) <strong>确定Leader</strong>。经过第二轮投票后，集群中的每台机器都会再次接收到其他机器的投票，然后开始统计投票，如果一台机器收到了超过半数的相同投票，那么这个投票对应的SID机器即为Leader。此时Server3将成为Leader。</p>
+<p>由上面规则可知，通常那台服务器上的数据越新（ZXID会越大），其成为Leader的可能性越大，也就越能够保证数据的恢复。如果ZXID相同，则SID越大机会越大。</p>
+<h4 id="选举实现细节"><a href="#选举实现细节" class="headerlink" title="选举实现细节"></a>选举实现细节</h4><h5 id="服务器状态"><a href="#服务器状态" class="headerlink" title="服务器状态"></a>服务器状态</h5><p>一台服务器具有四种状态，分别是LOOKING、FOLLOWING、LEADING、OBSERVING。</p>
+<ol>
+<li><p>LOOKING：寻找Leader状态。当服务器处于该状态时，它会认为当前集群中没有Leader，因此需要进入Leader选举状态。</p>
+</li>
+<li><p>FOLLOWING：跟随者状态。表明当前服务器角色是Follower。</p>
+</li>
+<li><p>LEADING：领导者状态。表明当前服务器角色是Leader。</p>
+</li>
+<li><p>OBSERVING：观察者状态。表明当前服务器角色是Observer。</p>
+</li>
+</ol>
+<h5 id="投票数据结构"><a href="#投票数据结构" class="headerlink" title="投票数据结构"></a>投票数据结构</h5><p>每个投票中包含了两个最基本的信息，所推举服务器的SID和ZXID，投票（Vote）在Zookeeper中包含字段如下：</p>
+<ul>
+<li><p>id：被推举的Leader的SID。</p>
+</li>
+<li><p>zxid：被推举的Leader事务ID。</p>
+</li>
+<li><p>electionEpoch：逻辑时钟，用来判断多个投票是否在同一轮选举周期中，该值在服务端是一个自增序列，每次进入新一轮的投票后，都会对该值进行加1操作。</p>
+</li>
+<li><p>peerEpoch：被推举的Leader的epoch。</p>
+</li>
+<li><p>state：当前服务器的状态。</p>
+</li>
+</ul>
+<h5 id="QuorumCnxManager（网络I-O）"><a href="#QuorumCnxManager（网络I-O）" class="headerlink" title="QuorumCnxManager（网络I/O）"></a>QuorumCnxManager（网络I/O）</h5><p>每台服务器在启动的过程中，会启动一个QuorumPeerManager，负责各台服务器之间的底层Leader选举过程中的网络通信。</p>
+<h6 id="消息队列"><a href="#消息队列" class="headerlink" title="消息队列"></a>消息队列</h6><p>QuorumCnxManager内部维护了一系列的队列，用来保存接收到的、待发送的消息以及消息的发送器，除接收队列以外，其他队列都按照SID分组形成队列集合，如一个集群中除了自身还有3台机器，那么就会为这3台机器分别创建一个发送队列，互不干扰。</p>
+<ul>
+<li>recvQueue：消息接收队列，用于存放那些从其他服务器接收到的消息。</li>
+<li>queueSendMap：消息发送队列，用于保存那些待发送的消息，按照SID进行分组。</li>
+<li>senderWorkerMap：发送器集合，每个SenderWorker消息发送器，都对应一台远程Zookeeper服务器，负责消息的发送，也按照SID进行分组。</li>
+<li>lastMessageSent： 最近发送过的消息，为每个SID保留最近发送过的一个消息。</li>
+</ul>
+<h6 id="建立连接"><a href="#建立连接" class="headerlink" title="建立连接"></a>建立连接</h6><p>为了能够相互投票，Zookeeper集群中的所有机器都需要两两建立起网络连接。QuorumCnxManager在启动时会创建一个ServerSocket来监听Leader选举的通信端口(默认为3888)。开启监听后，Zookeeper能够不断地接收到来自其他服务器的创建连接请求，在接收到其他服务器的TCP连接请求时，会进行处理。为了避免两台机器之间重复地创建TCP连接，Zookeeper只允许SID大的服务器主动和其他机器建立连接，否则断开连接。在接收到创建连接请求后，服务器通过对比自己和远程服务器的SID值来判断是否接收连接请求，如果当前服务器发现自己的SID更大，那么会断开当前连接，然后自己主动和远程服务器建立连接。一旦连接建立，就会根据远程服务器的SID来创建相应的消息发送器SendWorker和消息接收器RecvWorker，并启动。</p>
+<h6 id="消息接收与发送"><a href="#消息接收与发送" class="headerlink" title="消息接收与发送"></a>消息接收与发送</h6><p>消息接收：由消息接收器RecvWorker负责，由于Zookeeper为每个远程服务器都分配一个单独的RecvWorker，因此，每个RecvWorker只需要不断地从这个TCP连接中读取消息，并将其保存到recvQueue队列中。<strong>消息发送</strong>：由于Zookeeper为每个远程服务器都分配一个单独的SendWorker，因此，每个SendWorker只需要不断地从对应的消息发送队列中获取出一个消息发送即可，同时将这个消息放入lastMessageSent中。在SendWorker中，一旦Zookeeper发现针对当前服务器的消息发送队列为空，那么此时需要从lastMessageSent中取出一个最近发送过的消息来进行再次发送，这是为了解决接收方在消息接收前或者接收到消息后服务器挂了，导致消息尚未被正确处理。同时，Zookeeper能够保证接收方在处理消息时，会对重复消息进行正确的处理。</p>
+<h5 id="FastLeaderElection：选举算法核心"><a href="#FastLeaderElection：选举算法核心" class="headerlink" title="FastLeaderElection：选举算法核心"></a>FastLeaderElection：选举算法核心</h5><p><strong>· 外部投票</strong>：特指其他服务器发来的投票。</p>
+<p><strong>· 内部投票</strong>：服务器自身当前的投票。</p>
+<p><strong>· 选举轮次</strong>：Zookeeper服务器Leader选举的轮次，即logicalclock。</p>
+<p><strong>· PK</strong>：对内部投票和外部投票进行对比来确定是否需要变更内部投票。</p>
+<h6 id="选票管理"><a href="#选票管理" class="headerlink" title="选票管理"></a>选票管理</h6><p><strong>· sendqueue</strong>：选票发送队列，用于保存待发送的选票。</p>
+<p><strong>· recvqueue</strong>：选票接收队列，用于保存接收到的外部投票。</p>
+<p><strong>· WorkerReceiver</strong>：选票接收器。其会不断地从QuorumCnxManager中获取其他服务器发来的选举消息，并将其转换成一个选票，然后保存到recvqueue中，在选票接收过程中，如果发现该外部选票的选举轮次小于当前服务器的，那么忽略该外部投票，同时立即发送自己的内部投票。</p>
+<p>　<strong>· WorkerSender</strong>：选票发送器，不断地从sendqueue中获取待发送的选票，并将其传递到底层QuorumCnxManager中。</p>
+<p>(2) 算法核心</p>
+<p><img src="https://i.loli.net/2021/04/11/yFnxRhaCUzpSvPl.png" alt="img"></p>
+<p>上图展示了FastLeaderElection模块是如何与底层网络I/O进行交互的。Leader选举的基本流程如下</p>
+<ol>
+<li><p><strong>自增选举轮次</strong>。Zookeeper规定所有有效的投票都必须在同一轮次中，在开始新一轮投票时，会首先对logicalclock进行自增操作。</p>
+</li>
+<li><p><strong>初始化选票</strong>。在开始进行新一轮投票之前，每个服务器都会初始化自身的选票，并且在初始化阶段，每台服务器都会将自己推举为Leader。</p>
+</li>
+<li><p><strong>发送初始化选票</strong>。完成选票的初始化后，服务器就会发起第一次投票。Zookeeper会将刚刚初始化好的选票放入sendqueue中，由发送器WorkerSender负责发送出去。</p>
+</li>
+<li><p><strong>接收外部投票</strong>。每台服务器会不断地从recvqueue队列中获取外部选票。如果服务器发现无法获取到任何外部投票，那么就会立即确认自己是否和集群中其他服务器保持着有效的连接，如果没有连接，则马上建立连接，如果已经建立了连接，则再次发送自己当前的内部投票。</p>
+</li>
+</ol>
+<p>　5. <strong>判断选举轮次</strong>。在发送完初始化选票之后，接着开始处理外部投票。在处理外部投票时，会根据选举轮次来进行不同的处理。</p>
+<p><strong>· 外部投票的选举轮次大于内部投票</strong>。若服务器自身的选举轮次落后于该外部投票对应服务器的选举轮次，那么就会立即更新自己的选举轮次(logicalclock)，并且清空所有已经收到的投票，然后使用初始化的投票来进行PK以确定是否变更内部投票。最终再将内部投票发送出去。</p>
+<p><strong>· 外部投票的选举轮次小于内部投**</strong>票**。若服务器接收的外选票的选举轮次落后于自身的选举轮次，那么Zookeeper就会直接忽略该外部投票，不做任何处理，并返回步骤4。</p>
+<p><strong>· 外部投票的选举轮次等于内部投票</strong>。此时可以开始进行选票PK。</p>
+<ol start="6">
+<li><strong>选票PK</strong>。在进行选票PK时，符合任意一个条件就需要变更投票。</li>
+</ol>
+<p>　　　　· 若外部投票中推举的Leader服务器的选举轮次大于内部投票，那么需要变更投票。</p>
+<p>　　　　· 若选举轮次一致，那么就对比两者的ZXID，若外部投票的ZXID大，那么需要变更投票。</p>
+<p>　　　　· 若两者的ZXID一致，那么就对比两者的SID，若外部投票的SID大，那么就需要变更投票。</p>
+<ol start="7">
+<li><p><strong>变更投票</strong>。经过PK后，若确定了外部投票优于内部投票，那么就变更投票，即使用外部投票的选票信息来覆盖内部投票，变更完成后，再次将这个变更后的内部投票发送出去。</p>
+</li>
+<li><p><strong>选票归档</strong>。无论是否变更了投票，都会将刚刚收到的那份外部投票放入选票集合recvset中进行归档。recvset用于记录当前服务器在本轮次的Leader选举中收到的所有外部投票（按照服务队的SID区别，如{(1, vote1), (2, vote2)…}）。</p>
+</li>
+<li><p><strong>统计投票</strong>。完成选票归档后，就可以开始统计投票，统计投票是为了统计集群中是否已经有过半的服务器认可了当前的内部投票，如果确定已经有过半服务器认可了该投票，则终止投票。否则返回步骤4。</p>
+</li>
+<li><p><strong>更新服务器状态</strong>。若已经确定可以终止投票，那么就开始更新服务器状态，服务器首选判断当前被过半服务器认可的投票所对应的Leader服务器是否是自己，若是自己，则将自己的服务器状态更新为LEADING，若不是，则根据具体情况来确定自己是FOLLOWING或是OBSERVING。</p>
+</li>
+</ol>
+<p>　　以上10个步骤就是FastLeaderElection的核心，其中步骤4-9会经过几轮循环，直到有Leader选举产生。</p>
+<p><strong>三、总结</strong></p>
+<p>​    gaoshan个人解释，选举轮次，也就是逻辑时钟，即logicalclock。这个值，不会频繁变化，一次选举，自增一次。一次选举过程中，可能包括多次投票，投票不涉及逻辑时钟的自增。</p>
+<p>​     举例，初始情况下5台机器，sid分别为1、2、3、4、5，逻辑时钟都是0。依次启动后，开始选举，所有的机器逻辑时钟自增为1。经过多次投票，假设第三台机器为leader，其他4台机器为follower，此时5台机器的逻辑时钟都为1。</p>
+<p>​    一般情况下，逻辑时钟应该都是相同的。但是，由于一些机器崩溃的问题，是可能出现逻辑时钟不一致的情况的。例如，上例中，sid=3的机器为leader。之后某一刻，sid为1、3的机器崩溃，zookeeper仍然可以正常对外提供服务。但需要重新选主，剩下的2、4、5重新投票选主，假设sid=5成为新的leader，逻辑时钟自增，由1变成2。之后某一刻，sid为5的机器奔溃，sid为1的机器复活，仍然有3台机器运行，zookeeper可以对外提供服务，但需要重新选主。重新选主，逻辑时钟自增，这时sid为2、4的机器的逻辑时钟是由2自增为3，而sid为1的机器的逻辑时钟是由1自增为2。这种情况下，就出现了逻辑时钟不一致的情况。这时，需要清楚sid为1的机器内部的投票数据，因为这些投票数据都是过时的数据。</p>
+<blockquote>
+<blockquote>
+<p><a href="https://www.jianshu.com/p/c2ced54736aa">https://www.jianshu.com/p/c2ced54736aa</a></p>
+</blockquote>
+</blockquote>
+<p>服务器启动过程</p>
+<p><img src="https://i.loli.net/2021/04/11/IOryTNFlBdHnquV.png" alt="image-20210411231957113"></p>
+<pre><code>mermaid
+stateDiagram-v2
+    [*] --&gt; 处于LOOKING状态: 服务器节点启动
+    处于LOOKING状态 --&gt; 存在LEADER: 查找LEADER
+    存在LEADER --&gt; 变更状态为LEADING或FOLLOWING: YES，变更状态为FOLLOWING
+    存在LEADER --&gt; 选举LEADER: NO
+    选举LEADER --&gt; 选举获胜
+    选举获胜 --&gt; 变更状态为LEADING或FOLLOWING: YES，变更状态为LEADING
+    选举获胜 --&gt; 变更状态为LEADING或FOLLOWING: NO，变更状态为FOLLOWING
+    变更状态为LEADING或FOLLOWING --&gt; [*]
+</code></pre>
+<p>选举过程</p>
+<p><img src="https://i.loli.net/2021/04/11/FhQAjvpoid7gC1D.png" alt="image-20210411232131334"></p>
+<pre><code>mermaid
+stateDiagram-v2
+    [*] --&gt; 处于LOOKING状态: 变更状态为LOOKING
+    处于LOOKING状态 --&gt; 存在LEADER: 查找LEADER
+    存在LEADER --&gt; 变更状态为LEADING或FOLLOWING: YES，变更状态为FOLLOWING
+    存在LEADER --&gt; 收到投票: NO，进行投票，并且投票给自己
+    收到投票 --&gt; 投票给自己: 自己的zxid是最大的，或zxid相同，自己的myid最大
+    收到投票 --&gt; 投给别人: 别人的zxid更大的，或者zxid相同，别人的myid更大
+    投票给自己 --&gt; 统计投票
+    投给别人 --&gt; 统计投票
+    统计投票 --&gt; 变更状态为LEADING或FOLLOWING: 超过半数机器投相同的票
+    统计投票 --&gt; 继续投票: 没有超过半数机器投相同的票
+    继续投票 --&gt;  投票给自己: 自己的zxid是最大的，或zxid相同，自己的myid最大
+    继续投票 --&gt; 投给别人: 别人的zxid更大的，或者zxid相同，别人的myid更大
+    变更状态为LEADING或FOLLOWING --&gt; [*]
+</code></pre>
+<h3 id="五、补充"><a href="#五、补充" class="headerlink" title="五、补充"></a>五、补充</h3><h4 id="ZXID"><a href="#ZXID" class="headerlink" title="ZXID"></a>ZXID</h4><p>集群范围内，全局单调唯一递增； ZXID是一个64位的数字，低32代表一个单调递增的计数器，高32位代表Leader周期。</p>
+<h4 id="ZXID变化"><a href="#ZXID变化" class="headerlink" title="ZXID变化"></a><strong>ZXID变化</strong></h4><ul>
+<li>当有新的Leader产生时，Leader周期epoch加1，计数器从0开始；</li>
+<li>每处理一个事务请求，计数器加1；</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Zookeeper</category>
+      </categories>
+      <tags>
+        <tag>Zookeeper</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>为什么内部类引用的局部变量必须声明为final？</title>
+    <url>/2021/02/07/%E4%B8%BA%E4%BB%80%E4%B9%88%E5%86%85%E9%83%A8%E7%B1%BB%E5%BC%95%E7%94%A8%E7%9A%84%E5%B1%80%E9%83%A8%E5%8F%98%E9%87%8F%E5%BF%85%E9%A1%BB%E5%A3%B0%E6%98%8E%E4%B8%BAfinal%EF%BC%9F/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>参考如下代码：</p>
+<pre><code class="java">public class Main &#123;
+    public static void main(String[] args) &#123;
+        // 从内部类读取这个变量
+        int read = 5;
+        // 从内部类写这个变量
+        int write = 4;
+        Thread thread = new Thread()&#123;
+            @Override
+            public void run() &#123;
+                int z = read;
+                // 编译报错
+                write = 6;
+            &#125;
+        &#125;;
+    &#125;
+&#125;
+</code></pre>
+<p>上述代码表示新开一个线程读写Main类的静态main方法的两个变量，其中<code>write = 6; </code> 这一行在jdk8上编译报错：</p>
+<pre><code>java: 从内部类引用的本地变量必须是最终变量或实际上的最终变量
+</code></pre>
+<p>或者</p>
+<pre><code>Variable &#39;write&#39; is accessed from within inner class, needs to be final or effectively final
+</code></pre>
+<p>将这一行注释能够正常通过编译，但是当我们把的jdk版本从8修改为7（idea 需要在设置里调整成7 ）再执行<code>mvn install</code>：</p>
+<pre><code class="xml">&lt;properties&gt;
+    &lt;maven.compiler.source&gt;7&lt;/maven.compiler.source&gt;
+    &lt;maven.compiler.target&gt;7&lt;/maven.compiler.target&gt;
+&lt;/properties&gt;
+</code></pre>
+<p>同样会遇到上述错误。</p>
+<p>实际开发中稍微写过一点点代码的开发都应该会遇到上面的报错。下面就此简单探讨下：匿名内部类（或 Lambda 表达式）中，可能会引用外部环境中的自由变量的情况，此处自由变量可能是：</p>
+<ol>
+<li>外部类的成员变量</li>
+<li>外部类方法参数或方法体中的局部变量。</li>
+</ol>
+<h2 id="外部类成员变量"><a href="#外部类成员变量" class="headerlink" title="外部类成员变量"></a>外部类成员变量</h2><pre><code class="java">public class Outer &#123;
+    public int value = 100;
+
+    public Inner getInner() &#123;
+
+        return new Inner() &#123;
+            @Override
+            public int getOuterValue() &#123;
+                // 此处可引用外部环境的变量
+                return value;
+            &#125;
+            public void setOuterValue(int value) &#123;
+                // 此处修改外部环境中的变量
+                Outer.this.value = 12;
+            &#125;
+        &#125;;
+    &#125;
+    interface Inner &#123;
+        int getOuterValue();
+        void setOuterValue(int v);
+    &#125;
+&#125;
+</code></pre>
+<p>上述代码在jdk7和8都能正常通过编译，反编译查看字节码：</p>
+<pre><code class="java">import Outer.Inner;
+
+class Outer$1 implements Inner &#123;
+    Outer$1(Outer this$0) &#123;
+        this.this$0 = this$0;
+    &#125;
+
+    public int readValue() &#123;
+        return this.this$0.value;
+    &#125;
+
+    public void writeValue() &#123;
+        this.this$0.value = 12;
+    &#125;
+&#125;
+</code></pre>
+<p>可知，内部类只有一个外部类实例的构造函数，该构造函数将自己的this$0引用指向该实例。对value的操作都是通过对外部类实例进行操作来实现。</p>
+<h2 id="外部类方法参数或局部变量"><a href="#外部类方法参数或局部变量" class="headerlink" title="外部类方法参数或局部变量"></a>外部类方法参数或局部变量</h2><pre><code class="java">public class Outer &#123;
+
+    public Inner getInner(int valueX) &#123;
+
+        int valueY = 1;
+        return new Inner() &#123;
+            @Override
+            public int readValue() &#123;
+                // 此处可引用外部环境的变量
+                return valueX + valueY;
+            &#125;
+            public void writeValue() &#123;
+                // 此处修改外部环境中的变量报错
+                // [ERROR] src/main/java/Outer.java:[14,17] 从内部类引用的本地变量必须是最终变量或实际上的最终变量                                                 
+                // [ERROR] src/main/java/Outer.java:[15,17] 从内部类引用的本地变量必须是最终变量或实际上的最终变量
+                valueX = 12;
+                valueY = 12;
+            &#125;
+        &#125;;
+    &#125;
+    interface Inner &#123;
+        int readValue();
+        void writeValue();
+    &#125;
+&#125;
+</code></pre>
+<p>上述代码编译报错：</p>
+<pre><code>[ERROR] src/main/java/Outer.java:[14,17] 从内部类引用的本地变量必须是最终变量或实际上的最终变量
+[ERROR] src/main/java/Outer.java:[15,17] 从内部类引用的本地变量必须是最终变量或实际上的最终变量
+</code></pre>
+<p>将报错代码注释之后，查看反编译代码：</p>
+<pre><code class="java">import Outer.Inner;
+
+class Outer$1 implements Inner &#123;
+    Outer$1(Outer this$0, int var2, int var3) &#123;
+        this.this$0 = this$0;
+        this.val$valueX = var2;
+        this.val$valueY = var3;
+    &#125;
+
+    public int readValue() &#123;
+        return this.val$valueX + this.val$valueY;
+    &#125;
+
+    public void writeValue() &#123;
+    &#125;
+&#125;
+</code></pre>
+<p>同样，匿名内部类通过this$0引用持有外部类实例，除此之外，编译器将匿名内部类依赖的外部环境(外部类方法参数和方法体中的局部变量)拷贝了一份传入匿名内部类中。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>众所周知，Java 是值传递的。当值是基本类型时，传递的是值的拷贝；当值是引用类型时，传递的是引用的拷贝，无论怎么改变这个新的引用的指向，原来的引用的指向不变，例如：</p>
+<pre><code class="java">public class Main &#123;
+
+    public static void changeReference(Object object)&#123;
+        object = new Object()&#123;
+            @Override
+            public String toString() &#123;
+                return &quot;benjamin&quot;;
+            &#125;
+        &#125;;
+    &#125;
+
+    public static void main(String[] args) &#123;
+        Object sam = new Object()&#123;
+            @Override
+            public String toString() &#123;
+                return &quot;sam&quot;;
+            &#125;
+        &#125;;
+        changeReference(sam);
+        System.out.println(sam);
+    &#125;
+&#125;
+</code></pre>
+<p>输出:</p>
+<pre><code>sam
+</code></pre>
+<p>因为java 是值传递，所以匿名内部类中使用的自由变量是原来的自由变量值的一个副本（基本类型是值的副本，引用类型是引用地址值的副本），修改它们的值并不会影响外部环境中的自由变量，为了让使用者使用起来感觉和引用传递一样，java 干脆做了限制：在 JDK 8 以前，必须使用 final 修饰，在 JDK 8 以后，可以不用 final 修饰，但是变量必须是有效只读(effectively final) 的。这样大家一看是 final 的，就不会去修改它了，即便修改也会编译器报错。即便未来java改成引用传递，也能保证兼容现有代码。</p>
+]]></content>
+      <categories>
+        <category>JVM</category>
+      </categories>
+      <tags>
+        <tag>JVM</tag>
+        <tag>final</tag>
+        <tag>有道云笔记迁移</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>双亲委派机制</title>
+    <url>/2021/04/11/%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%9C%BA%E5%88%B6/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title>并行和并发</title>
+    <url>/2021/02/11/%E5%B9%B6%E8%A1%8C%E5%92%8C%E5%B9%B6%E5%8F%91/</url>
+    <content><![CDATA[<h2 id="并行（Parallel）与并发（Concurrent）"><a href="#并行（Parallel）与并发（Concurrent）" class="headerlink" title="并行（Parallel）与并发（Concurrent）"></a>并行（Parallel）与并发（Concurrent）</h2><p>中文里并行和并发两个词很接近，也不知道是哪里S13翻译的。</p>
+<p>Parallel是真正意义的多个线程一起执行,CPU级别需要支持多个线程同时可以执行，并发并不一定是需要多核CPU的支持，他指的是多个线程能够被CPU轮流切换着执行，Concurrent也可能是Parallel的一种，前者和后者仅仅是在CPU支持模式上面不同，并不一定是要有确切的分别。Concurrent关注的是应用级别，而Parallel强调的是CPU的能力。</p>
+<p>实现Concurrent控制的手段有很多种，java当中一般有 Lock，synchronized以及CAS，当然还有JUC里面的各种并发控制包，但是其底层都是使用AQS来实现并发控制的，是一种无锁同步的实现。</p>
+<p><img src="https://i.loli.net/2021/04/11/faW54KC7B1SpHUt.png" alt="image-20210411220146198"></p>
+]]></content>
+      <categories>
+        <category>名词解释</category>
+      </categories>
+      <tags>
+        <tag>名词解释</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>我回来了</title>
+    <url>/2023/09/11/%E6%88%91%E5%9B%9E%E6%9D%A5%E4%BA%86/</url>
+    <content><![CDATA[<p>距上次换工作两年，朋友最近给我发来了他的最新博客。打开后，我被充满青春气息的内容深深吸引，仿佛我重新回到了2016年的秋天，那时候的我对一切都是那么的向往。</p>
+<p>朋友最近的博客主要关注日常生活，这让我想到，博客并不一定要用来记录高深的技术内容或者死板的文字。记录生活也是一个不错的选择，特别是在这个喧嚣的时代，我迫切需要找到一个静心思考的角落。</p>
+<p>我回来了！</p>
+]]></content>
+      <categories>
+        <category>生活</category>
+      </categories>
+      <tags>
+        <tag>日常</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>监视器和sychronized</title>
+    <url>/2020/12/01/%E7%9B%91%E8%A7%86%E5%99%A8%E5%92%8Csychronized/</url>
+    <content><![CDATA[<h2 id="Monitor简述"><a href="#Monitor简述" class="headerlink" title="Monitor简述"></a>Monitor简述</h2><blockquote>
+<p> A Monitor defines a lock and zero or more condition variables for managing concurrent access to shared data.</p>
+</blockquote>
+<p>监视器（Monitor）是一种和信号量（Sophomore）等价的同步机制。它在Java并发编程中也非常重要，虽然程序员没有直接接触监视器，但它是<code>synchronized</code>和<code>wait()/notify()</code>等线程同步和线程间协作工具的基石：当我们在使用这些工具时，其实是它在背后提供了支持。简单来说：</p>
+<ul>
+<li>监视器使用锁（lock）确保了在任何情况下管程中只有一个活跃的线程，即确保线程互斥访问临界区</li>
+<li>监视器使用条件变量（Condition Variable）提供的等待队列（Waiting Set）实现线程间协作，当线程暂时不能获得所需资源时，进入队列等待，当线程可以获得所需资源时，从等待队列中唤醒</li>
+</ul>
+<h2 id="Java语言规范中提及的Monitor"><a href="#Java语言规范中提及的Monitor" class="headerlink" title="Java语言规范中提及的Monitor"></a>Java语言规范中提及的Monitor</h2><p>在Java语言规范中，虽然没有具体定义Monitor该如何实现，但至少说明了<code>wait()/notify()</code>和<code>synchronized</code>等关键词和它密切相关。</p>
+<blockquote>
+<p> The Java programming language provides multiple mechanisms for communicating between threads. The most basic of these methods is <em>synchronization</em>, which is implemented using <em>monitors</em>. Each object in Java is associated with a monitor, which a thread can <em>lock</em> or <em>unlock</em>. Only one thread at a time may hold a lock on a monitor. Any other threads attempting to lock that monitor are blocked until they can obtain a lock on that monitor. A thread <em>t</em> may lock a particular monitor multiple times; each unlock reverses the effect of one lock operation.<br> Java编程语言提供了多种线程之间通信的机制。 这些方法中最基本的是<em>同步</em>，该同步是通过<em>monitor</em>实现的。Java中的每个对象都与一个monitor关联，线程可以<code>lock</code>或<code>unlock</code> monitor。 一次只能有一个线程在monitor上持有锁。 尝试<code>lock</code>该monitor的所有其他线程将被阻止（阻塞），直到它们可以在该monitor上获得锁为止。 线程t可以多次<code>lock</code>特定的monitor。 每次<code>unlock</code>都会逆转一次<code>lock</code>操作的效果。</p>
+<p> The <code>synchronized</code> statement (<a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.19">§14.19</a>) computes a reference to an object; it then attempts to perform a lock action on that object’s monitor and does not proceed further until the lock action has successfully completed. After the lock action has been performed, the body of the <code>synchronized</code> statement is executed. If execution of the body is ever completed, either normally or abruptly, an unlock action is automatically performed on that same monitor.<br> <code>synchronized</code>语句(<a href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.19">§14.19</a>)计算对对象的引用； 然后，它尝试在该对象的监视器上执行锁定操作，并且在锁定操作成功完成之前不会进行其他操作。 执行锁定动作后，将执行<code>synchronized</code>语句的主体。 如果主体的执行正常或突然完成，则会在同一监视器上自动执行解锁动作。</p>
+</blockquote>
+<p>除此之外，Java语言规范里也定义了<code>wait()/notify()/notifyAll()</code>的语义，以及它们和等待集这一底层实现的关系。</p>
+<blockquote>
+<p> Every object, in addition to having an associated monitor, has an associated <em>wait set</em>. A wait set is a set of threads.<br> 每个对象除具有关联的monitor外，还具有关联的等待集。等待集是一个线程集合。</p>
+<p> When an object is first created, its wait set is empty. Elementary actions that add threads to and remove threads from wait sets are atomic. Wait sets are manipulated solely through the methods <code>Object.wait</code>, <code>Object.notify</code>, and <code>Object.notifyAll</code>.<br> 首次创建对象时，其等待集为空。将线程添加到等待集中或从等待集中删除线程的基本操作是原子的。等待集仅通过<code>Object.wait</code>, <code>Object.notify</code>和<code>Object.notifyAll</code>方法操作。</p>
+</blockquote>
+<h2 id="HotSpot虚拟机中的管程实现"><a href="#HotSpot虚拟机中的管程实现" class="headerlink" title="HotSpot虚拟机中的管程实现"></a>HotSpot虚拟机中的管程实现</h2><p>HotSpot虚拟机的<code>src/share/vm/runtime/objectMonitor.hpp</code>中有个<code>ObjectMonitor</code>的类（<a href="http://hg.openjdk.java.net/jdk8/jdk8/hotspot/file/87ee5ee27509/src/share/vm/runtime/objectMonitor.hpp">源码点这里</a>），揭示了monitor的底层实现。</p>
+<pre><code class="c">ObjectMonitor() &#123;
+    _header       = NULL;
+    _count        = 0;
+    _waiters      = 0,
+    _recursions   = 0;
+    _object       = NULL;
+    _owner        = NULL;
+    _WaitSet      = NULL;
+    _WaitSetLock  = 0 ;
+    _Responsible  = NULL ;
+    _succ         = NULL ;
+    _cxq          = NULL ;
+    FreeNext      = NULL ;
+    _EntryList    = NULL ;
+    _SpinFreq     = 0 ;
+    _SpinClock    = 0 ;
+    OwnerIsThread = 0 ;
+    _previous_owner_tid = 0;
+  &#125;
+</code></pre>
+<p><a href="https://www.cnblogs.com/webor2006/p/11442551.html">参考资料</a></p>
+<h2 id="Mesa语义和Hoare语义"><a href="#Mesa语义和Hoare语义" class="headerlink" title="Mesa语义和Hoare语义"></a>Mesa语义和Hoare语义</h2><p>假如有两个线程T1和T2，T1因为资源不满足进入了等待队列，这时T2释放了T1所需的资源，这时会发生什么呢？T1应该被立即唤醒，还是等T2结束呢？这种情景下的不同操作区分出了两种语义的管程——Mesa语义和Hoare语义。有关这两种语义的管程，本文不再赘述，详细可以参看UCSD的<a href="https://cseweb.ucsd.edu/classes/sp17/cse120-a/applications/ln/lecture8.html">lecture</a>。</p>
+]]></content>
+      <categories>
+        <category>JVM</category>
+      </categories>
+      <tags>
+        <tag>锁</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>类锁和对象锁</title>
+    <url>/2021/02/19/%E7%B1%BB%E9%94%81%E5%92%8C%E5%AF%B9%E8%B1%A1%E9%94%81/</url>
+    <content><![CDATA[<h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p><strong>互斥锁</strong>（英语：Mutual exclusion，缩写 Mutex）是一种用于<a href="https://www.wanweibaike.com/wiki-%E5%A4%9A%E7%BA%BF%E7%A8%8B">多线程</a><a href="https://www.wanweibaike.com/wiki-%E7%BC%96%E7%A8%8B">编程</a>中，防止两条<a href="https://www.wanweibaike.com/wiki-%E7%BA%BF%E7%A8%8B">线程</a>同时对同一公共资源（比如<a href="https://www.wanweibaike.com/wiki-%E5%85%A8%E5%9F%9F%E8%AE%8A%E6%95%B8">全局变量</a>）进行读写的机制。该目的通过将代码切片成一个一个的临界区域（critical section）达成。临界区域指的是一块对公共资源进行访问的代码，并非一种机制或是算法。一个程序、进程、线程可以拥有多个临界区域，但是并不一定会应用互斥锁。</p>
+<p>java的内置锁：每个java对象都可以用做一个实现同步的锁，这些锁成为内置锁。线程进入同步代码块或方法的时候会自动获得该锁，在退出同步代码块或方法时会释放该锁。获得内置锁的唯一途径就是进入这个锁的保护的同步代码块或方法。</p>
+<p>java内置锁是一个互斥锁，这就是意味着最多只有一个线程能够获得该锁，当线程A尝试去获得线程B持有的内置锁时，线程A必须等待或者阻塞，直到线程B释放这个锁，如果B线程不释放这个锁，那么A线程将永远等待下去。</p>
+<p> java的对象锁和类锁：java的对象锁和类锁在锁的概念上基本上和内置锁是一致的，但是，两个锁实际是有很大的区别的，对象锁是用于对象实例方法，或者一个对象实例上的，类锁是用于类的静态方法或者一个类的class对象上的。我们知道，类的对象实例可以有很多个，但是每个类只有一个class对象，所以不同对象实例的对象锁是互不干扰的，但是每个类只有一个类锁。</p>
+<h3 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h3><p>对象锁</p>
+<pre><code class="java">public class Main&#123;
+  public static void main(String []args)&#123;
+    Main main = new 
+  &#125;
+&#125;
+</code></pre>
+]]></content>
+      <categories>
+        <category>JVM</category>
+      </categories>
+      <tags>
+        <tag>JVM</tag>
+        <tag>final</tag>
+        <tag>有道云笔记迁移</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>优雅的关闭线程</title>
+    <url>/2020/12/15/%E7%BA%BF%E7%A8%8B%E5%A6%82%E4%BD%95%E4%B8%AD%E6%96%AD/</url>
+    <content><![CDATA[<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>在日常开发中，发现Thread.stop, Thread.suspend, Thread.resume 都被IDEA划了删除线，即已经被废弃了，所以花点时间了解下应该如何正确的停止一个线程。</p>
+<p>Thread方法中的stop方法如下：</p>
+<pre><code class="java">    /**
+     * Forces the thread to stop executing.
+     * &lt;p&gt;
+     * ...
+     *
+     * @exception  SecurityException  if the current thread cannot
+     *               modify this thread.
+     * ...
+     * @deprecated This method is inherently unsafe.  Stopping a thread with
+     *       Thread.stop causes it to unlock all of the monitors that it
+     *       has locked (as a natural consequence of the unchecked
+     *       &lt;code&gt;ThreadDeath&lt;/code&gt; exception propagating up the stack).  If
+     *       any of the objects previously protected by these monitors were in
+     *       an inconsistent state, the damaged objects become visible to
+     *       other threads, potentially resulting in arbitrary behavior.  Many
+     *       uses of &lt;code&gt;stop&lt;/code&gt; should be replaced by code that simply
+     *       modifies some variable to indicate that the target thread should
+     *       stop running.  The target thread should check this variable
+     *       regularly, and return from its run method in an orderly fashion
+     *       if the variable indicates that it is to stop running.  If the
+     *       target thread waits for long periods (on a condition variable,
+     *       for example), the &lt;code&gt;interrupt&lt;/code&gt; method should be used to
+     *       interrupt the wait.
+     *       For more information, see
+     *       &lt;a href=&quot;&#123;@docRoot&#125;/../technotes/guides/concurrency/threadPrimitiveDeprecation.html&quot;&gt;Why
+     *       are Thread.stop, Thread.suspend and Thread.resume Deprecated?&lt;/a&gt;.
+     */
+    @Deprecated
+    public final void stop() &#123;
+        SecurityManager security = System.getSecurityManager();
+        if (security != null) &#123;
+            checkAccess();
+            if (this != Thread.currentThread()) &#123;
+                security.checkPermission(SecurityConstants.STOP_THREAD_PERMISSION);
+            &#125;
+        &#125;
+        // A zero status value corresponds to &quot;NEW&quot;, it can&#39;t change to
+        // not-NEW because we hold the lock.
+        if (threadStatus != 0) &#123;
+            resume(); // Wake up thread if it was suspended; no-op otherwise
+        &#125;
+
+        // The VM can handle all thread states
+        stop0(new ThreadDeath());
+    &#125;
+</code></pre>
+<p>从该方法注释可知，stop方法用于强制停止一个线程，被废弃的原因主要如下：<br>这种方法本质上是不安全的。使用Thread.stop停止线程会使其解锁已锁定的所有监视器（monitors）（当<code>ThreadDeath</code>异常被抛出时将会产生的后果）。如果这些监视器以前保护的任何对象处于不一致状态，则损坏的对象对其他线程可见，可能导致任意行为。<code>stop</code>的用法应该被增加的简单变量以指示目标线程应该停止运行的代码所取代。目标线程应该定期检查该变量，如果该变量指示它要停止运行，则以有序的方式从其run方法返回。如果目标线程长时间等待（例如，在条件变量上），则应使用<code>interrupt</code>方法来中断等待。</p>
+<p>即当前线程持有某些锁时，被外部调用stop，会抛出一个<code>ThreadDeath</code>的异常，这个异常会导致锁被释放，从而导致不可预期的行为。</p>
+<pre><code class="java">/**
+ * An instance of &#123;@code ThreadDeath&#125; is thrown in the victim thread
+ * when the (deprecated) &#123;@link Thread#stop()&#125; method is invoked.
+ *
+ * &lt;p&gt;An application should catch instances of this class only if it
+ * must clean up after being terminated asynchronously.  If
+ * &#123;@code ThreadDeath&#125; is caught by a method, it is important that it
+ * be rethrown so that the thread actually dies.
+ *
+ * &lt;p&gt;The &#123;@linkplain ThreadGroup#uncaughtException top-level error
+ * handler&#125; does not print out a message if &#123;@code ThreadDeath&#125; is
+ * never caught.
+ *
+ * &lt;p&gt;The class &#123;@code ThreadDeath&#125; is specifically a subclass of
+ * &#123;@code Error&#125; rather than &#123;@code Exception&#125;, even though it is a
+ * &quot;normal occurrence&quot;, because many applications catch all
+ * occurrences of &#123;@code Exception&#125; and then discard the exception.
+ *
+ * @since   JDK1.0
+ */
+
+public class ThreadDeath extends Error &#123;
+    private static final long serialVersionUID = -4417128565033088268L;
+&#125;
+</code></pre>
+<h3 id="如何正确结束线程"><a href="#如何正确结束线程" class="headerlink" title="如何正确结束线程"></a>如何正确结束线程</h3><p>既然提到不要使用<code>stop</code>结束线程，那用<code>interrupt</code>如何？或者应该如何优雅的关闭线程？</p>
+<p>在上方的注释中jdk官方也给出了合适的解决方案，使用一个变量定期检查，如果条件不满足则从run方法中return，如果目标线程可能有长时间等待的需求，而我们又急于将这个线程杀死，那么使用interrupt来中断。</p>
+<p>一个线程不应该由其他线程来强制中断或停止，而是应该由线程自己自行停止，而<code>Thread.interrupt</code>的作用其实也不是中断线程，而是通知线程应该中断了，具体到底中断还是继续运行，应该由被通知的线程自己处理，类似于linux的<code>kill</code>命令，<code>kill</code>命令的信号进程可以自己处理，并选择忽略，而<code>kill -9</code>操作系统直接回收资源，所以应当慎用<code>kill -9</code>。</p>
+<p>具体来说，当对一个线程，调用 <code>interrupt()</code> 时，</p>
+<ul>
+<li>如果线程处于被阻塞状态（例如处于sleep, wait, join 等状态），那么线程将立即退出被阻塞状态，并抛出一个InterruptedException异常。仅此而已。</li>
+<li>如果线程处于正常活动状态，那么会将该线程的中断标志设置为 true，仅此而已。被设置中断标志的线程将继续正常运行，不受影响。</li>
+</ul>
+<p><code>interrupt()</code> 并不能真正的中断线程，需要被调用的线程自己进行配合才行。</p>
+<p>也就是说，一个线程如果有被中断的需求，那么就可以这样做。</p>
+<ul>
+<li>在正常运行任务时，经常检查本线程的中断标志位，如果被设置了中断标志就自行停止线程。</li>
+<li>在调用阻塞方法时正确处理InterruptedException异常。（例如，catch异常后就结束线程。）</li>
+</ul>
+<pre><code class="java">Thread thread = new Thread(() -&gt; &#123;
+    while (!Thread.interrupted()) &#123;
+        // do more work.
+    &#125;
+&#125;);
+thread.start();
+// 一段时间以后
+thread.interrupt();
+</code></pre>
+<p>而Thread.interrupted()清除标志位是为了下次继续检测标志位。<br>如果一个线程被设置中断标志后，选择结束线程那么自然不存在下次的问题，而如果一个线程被设置中断标识后，进行了一些处理后选择继续进行任务，而且这个任务也是需要被中断的，那么当然需要清除标志位了。</p>
+<h3 id="参考代码"><a href="#参考代码" class="headerlink" title="参考代码"></a>参考代码</h3><pre><code class="java">public class Main &#123;
+    public static void main(String[] args) &#123;
+        Thread th = new Thread(() -&gt; &#123;
+            while(true)&#123;
+                try &#123;
+                    long i = 0L;
+                    while(i &lt; 10000000000L) i++;
+                    System.out.println(&quot;Before interrupt.&quot;);
+                    Thread.sleep(1);
+                    System.out.println(&quot;After interrupt.&quot;);
+                &#125;catch (InterruptedException e)&#123;
+                    throw new RuntimeException();
+                &#125;
+            &#125;
+        &#125;);
+        th.start();
+        th.interrupt();
+        System.out.println(&quot;interrupt called.&quot;);
+    &#125;
+&#125;
+</code></pre>
+<p>首先启动线程，马上调用interrupt()然后对线程执行一个费时计算防止在调用<code>interrupt</code>之前就进入<code>Thread.sleep(1)</code>，实际输出如下：</p>
+<pre><code class="java">interrupt called.
+Before interrupt.
+Exception in thread &quot;Thread-1&quot; java.lang.RuntimeException
+    at thread.Main.lambda$main$0(Main.java:19)
+    at java.lang.Thread.run(Thread.java:748)
+
+Process finished with exit code 0
+</code></pre>
+<p>可以观测到，首先调用<code>interrupt</code>将线程的中断标志设置为 <code>true</code>，线程并不会停止，在调用<code>Thread.sleep</code>时触发<code>InterruptedException</code>，最终程序返回值还是0（因为异常发生在子线程中）</p>
+<p>而interrupted代码如下：</p>
+<pre><code class="java">public class Main &#123;
+    public static void main(String[] args) &#123;
+        Thread th = new Thread(() -&gt; &#123;
+            while(true)&#123;
+                try &#123;
+                    long i = 0L;
+                    while(i &lt; 100L) i++;
+                    System.out.println(&quot;Current Thread interrupted: &quot; + Thread.interrupted());
+                    Thread.sleep(1);
+                    System.out.println(&quot;After interrupt.&quot;);
+                &#125;catch (InterruptedException e)&#123;
+                    throw new RuntimeException();
+                &#125;
+            &#125;
+        &#125;);
+        th.start();
+        th.interrupt();
+        System.out.println(&quot;interrupt called.&quot;);
+    &#125;
+&#125;
+</code></pre>
+<p>输出信息如下：</p>
+<pre><code>interrupt called.
+Current Thread interrupted: true
+After interrupt.
+Current Thread interrupted: false
+After interrupt.
+Current Thread interrupted: false
+After interrupt.
+Current Thread interrupted: false
+After interrupt.
+.....
+</code></pre>
+<p>由</p>
+<pre><code class="java">    /**
+     * Tests whether the current thread has been interrupted.  The
+     * &lt;i&gt;interrupted status&lt;/i&gt; of the thread is cleared by this method.  In
+     * other words, if this method were to be called twice in succession, the
+     * second call would return false (unless the current thread were
+     * interrupted again, after the first call had cleared its interrupted
+     * status and before the second call had examined it).
+     *
+     * &lt;p&gt;A thread interruption ignored because a thread was not alive
+     * at the time of the interrupt will be reflected by this method
+     * returning false.
+     *
+     * @return  &lt;code&gt;true&lt;/code&gt; if the current thread has been interrupted;
+     *          &lt;code&gt;false&lt;/code&gt; otherwise.
+     * @see #isInterrupted()
+     * @revised 6.0
+     */
+    public static boolean interrupted() &#123;
+        return currentThread().isInterrupted(true);
+    &#125;
+
+    /**
+     * Causes the currently executing thread to sleep (temporarily cease
+     * execution) for the specified number of milliseconds, subject to
+     * the precision and accuracy of system timers and schedulers. The thread
+     * does not lose ownership of any monitors.
+     *
+     * @param  millis
+     *         the length of time to sleep in milliseconds
+     *
+     * @throws  IllegalArgumentException
+     *          if the value of &#123;@code millis&#125; is negative
+     *
+     * @throws  InterruptedException
+     *          if any thread has interrupted the current thread. The
+     *          &lt;i&gt;interrupted status&lt;/i&gt; of the current thread is
+     *          cleared when this exception is thrown.
+     */
+    public static native void sleep(long millis) throws InterruptedException;
+</code></pre>
+<p>可知，当<code>interrupt</code>字段设置为true的时候，如果此时正在sleep方法中，则会抛出<code>InterruptedException</code>并将标志位清空，当我们先调用<code>Thread.interrupted()</code>时，标志位已经被清空，此时sleep方法没有检测到标志位异常，走正常的sleep流程。</p>
+]]></content>
+      <categories>
+        <category>JVM</category>
+      </categories>
+      <tags>
+        <tag>JVM</tag>
+      </tags>
+  </entry>
+</search>
