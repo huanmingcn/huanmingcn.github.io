@@ -1611,7 +1611,7 @@ After interrupt.
   <entry>
     <title>2023 国庆</title>
     <url>/2023/10/07/2023%E5%9B%BD%E5%BA%86/</url>
-    <content><![CDATA[<p>今年国庆被爸妈安排去吃东道，但是没想到这么离谱，</p>
+    <content><![CDATA[<p>今年国庆被爸妈安排去吃东道，但是没想到会这么离谱，短短8天假期，就有以下酒席要参加：</p>
 <ul>
 <li>10.1 70岁大寿</li>
 <li>10.2 结婚</li>
@@ -1619,13 +1619,12 @@ After interrupt.
 <li>10.5 60岁大寿</li>
 <li>10.6 20岁成人礼</li>
 </ul>
-<p>好好的一个国庆假期，几乎全被安排去应酬了。</p>
-<p>因为10.3是我们大家族里的人结婚，我被安排帮忙做事情（我们那农村办酒席需要帮时会请血缘关系比较亲的各家青壮年），我甚至参与（旁观）了杀猪：</p>
+<p>逢人见面就灵魂拷问我： 找女朋友了没有？还没有找女朋友啊，上岁数了，要找老婆了。<br>被别人吹捧：现在3万多2万多一个月，会读书就是好。（我自己都不知道我啥时候月薪这么高了🤷）</p>
+<p>其中10.3是我们大家族里的人结婚，我被安排帮忙做事情（我们那农村办酒席需要帮时会请血缘关系比较亲的各家青壮年），我甚至参与（旁观）了杀猪：</p>
 <p>早上8点多的样子，村口响起了三轮摩托的声音，我们一群“帮手”走过去，车上有两头奄奄一息的猪，下来两个屠夫模样的人（穿着很厚的如同雨衣塑料一般的衣物），其中年长者说：“快给我点水浇下猪，猪快死了”。浇了一桶水之后两头猪立即恢复了生机。 </p>
 <p>之后，领头的人选中了其中一头猪，我们这群“帮手”便开始将猪赶去祠堂，由于我年龄最小，而且是头一次见这种场面，我站在旁边并没有搭手，其他人有的抓猪耳朵，有的拿竹篙赶猪，大家围成一个U形，只给猪留了一个口子，但是猪仿佛预料到自己的死亡一般，纵使棍棒交加，愣是没有一点动静。 </p>
 <p>屠夫见此路不通，立即招呼大家将猪抬进祠堂，大家开始抓住猪的四肢和耳朵，猪开始撕心裂肺的惨叫，心理承受能力差的人听了难免得有点心理阴影，见到这种场景着实把我吓了一跳，我便离他们更远了，此时我的堂嫂子便站在远处开玩笑式的口吻嘲笑我和我哥：喊你们来帮忙，你们站在旁边看着。我也着实想帮忙，可是猪的惨叫让我不敢上前，我堂哥对我说：“反正人这么多，不用咱两帮忙也行”（掩面🤦）。</p>
-<p>不一会儿，猪被抬到了祠堂里面并放在了案板上，屠夫在确认大家将猪固定好之后便开始杀猪，只见一把尖刀直插入猪的脖子，顺势划开一个15公分左右的大口子，猪停止了惨叫，猪血便哗啦啦如溪水般涌出，下方有一个铁盆装猪血，装满满满一大盆之后猪血还是不断的涌出，接着猪便失去了生机，不再挣扎。 </p>
-<p>好在屠夫是个熟手，快速结束了猪的痛苦。</p>
+<p>不一会儿，猪被抬到了祠堂里面并放在了案板上，屠夫在确认大家将猪固定好之后便开始杀猪，只见一把尖刀直插入猪的脖子，顺势划开一个15公分左右的大口子，猪停止了惨叫，猪血便哗啦啦如溪水般涌出，下方有一个铁盆装猪血，装满满满一大盆之后猪血还是不断的涌出，接着猪便失去了生机，不再挣扎。 幸好屠夫是个熟手，快速结束了猪的痛苦。</p>
 ]]></content>
       <categories>
         <category>生活</category>
@@ -1637,12 +1636,11 @@ After interrupt.
   <entry>
     <title>关于我的PRs被喷气大脑接受那档子事</title>
     <url>/2023/10/07/%E5%85%B3%E4%BA%8E%E6%88%91%E7%9A%84PRs%E8%A2%AB%E5%96%B7%E6%B0%94%E5%A4%A7%E8%84%91%E6%8E%A5%E5%8F%97%E9%82%A3%E6%A1%A3%E5%AD%90%E4%BA%8B/</url>
-    <content><![CDATA[<p>作为一个码农🧑‍💻，相信大部分人都有一个开源梦，希望能自己加入开源或者加入到现有的开源项目中。</p>
-<p>前段时间在帮公司将老项目迁移到Spring Boot时，频繁的使用IntelliJ IDEA的Dependency Analyzer分析依赖，但是发现IDEA有不少bug，例如在搜索依赖的页面是大小写敏感的，使用体验非常差，例如重新点击Dependency Analyzer的按钮，焦点不会重新获取，想着可以尝试一把自己修复。</p>
+    <content><![CDATA[<p>前段时间在帮公司将老项目迁移到Spring Boot时，频繁的使用IntelliJ IDEA的Dependency Analyzer分析依赖，但是发现IDEA有不少bug，例如在搜索依赖的页面是大小写敏感的，使用体验非常差，例如重新点击Dependency Analyzer的按钮，焦点不会重新获取，想着可以尝试一把自己修复。</p>
 <p>翻了下JetBrains中关于IntelliJ IDEA的文档，得到以下信息：<br>社区版仓库：<a href="https://github.com/JetBrains/intellij-community">https://github.com/JetBrains/intellij-community</a><br>将IDEA社区版在本地运行起来：<a href="https://github.com/JetBrains/intellij-community/blob/master/README.md#running-intellij-idea">https://github.com/JetBrains/intellij-community/blob/master/README.md#running-intellij-idea</a><br>贡献步骤：<a href="https://github.com/JetBrains/intellij-community/blob/master/CONTRIBUTING.md">https://github.com/JetBrains/intellij-community/blob/master/CONTRIBUTING.md</a>  <a href="https://www.jetbrains.com/opensource/idea/">https://www.jetbrains.com/opensource/idea/</a><br>IntelliJ Platform SDK: <a href="https://plugins.jetbrains.com/docs/intellij/welcome.html">https://plugins.jetbrains.com/docs/intellij/welcome.html</a></p>
 <p>于是便在JetBrains的YouTrack平台上提了两个ticket，详细描述了以上两个bug：<br><a href="https://youtrack.jetbrains.com/issue/IDEA-333389">https://youtrack.jetbrains.com/issue/IDEA-333389</a><br><a href="https://youtrack.jetbrains.com/issue/IDEA-333397">https://youtrack.jetbrains.com/issue/IDEA-333397</a></p>
 <p>之后经过自己尝试修复了以上两个bug，在确认没有明显地引入新的bug的情况下，便在Github上提出了PR。<br><a href="https://github.com/JetBrains/intellij-community/pull/2577">https://github.com/JetBrains/intellij-community/pull/2577</a><br><a href="https://github.com/JetBrains/intellij-community/pull/2579">https://github.com/JetBrains/intellij-community/pull/2579</a></p>
-<p>经过大概两周的等待之后，我终于收到了两封邮件，提示我机器人关闭了这两个PR并合并进了master分支，内心有些许激动，哈哈哈哈！！！！</p>
+<p>经过大概两周的等待之后，我终于收到了两封邮件，提示我机器人关闭了这两个PR并合并进了master分支，内心有些许激动，哈哈哈！！！！</p>
 <p><a href="https://github.com/JetBrains/intellij-community/commits?author=huanmingcn">https://github.com/JetBrains/intellij-community/commits?author=huanmingcn</a></p>
 ]]></content>
       <categories>
